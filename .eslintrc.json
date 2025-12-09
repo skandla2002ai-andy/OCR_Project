@@ -7,7 +7,8 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": "./tsconfig.base.json"
+    "project": "./tsconfig.base.json",
+    "tsconfigRootDir": "."
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
@@ -16,11 +17,38 @@
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "prettier"
   ],
+  "env": {
+    "es2022": true,
+    "node": true,
+    "browser": true
+  },
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "warn"
   },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "env": {
+        "node": true,
+        "es2022": true
+      },
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "rules": {
+        "no-undef": "off",
+        "no-console": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-argument": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["dist", "build", ".next", "node_modules", "*.config.js"]
 }

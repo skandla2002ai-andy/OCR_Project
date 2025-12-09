@@ -7,7 +7,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 let errors = [];
 let warnings = [];
@@ -16,7 +15,7 @@ function checkNodeVersion() {
   try {
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-    
+
     if (majorVersion < 22) {
       errors.push(`❌ Node 버전이 22 이상이어야 합니다. 현재: ${nodeVersion}`);
       return false;
@@ -38,7 +37,7 @@ function checkPackageJson() {
     }
 
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    
+
     // 프로젝트 이름 확인
     if (packageJson.name !== 'ocr-web-monorepo') {
       warnings.push(`⚠️  프로젝트 이름이 'ocr-web-monorepo'가 아닙니다: ${packageJson.name}`);
@@ -52,8 +51,8 @@ function checkPackageJson() {
       return false;
     }
 
-    const hasApps = packageJson.workspaces.some(w => w.includes('apps/*'));
-    const hasPackages = packageJson.workspaces.some(w => w.includes('packages/*'));
+    const hasApps = packageJson.workspaces.some((w) => w.includes('apps/*'));
+    const hasPackages = packageJson.workspaces.some((w) => w.includes('packages/*'));
 
     if (!hasApps) {
       errors.push('❌ workspaces에 "apps/*"가 포함되어 있지 않습니다.');
@@ -87,10 +86,7 @@ function checkPackageJson() {
 }
 
 function checkDirectoryStructure() {
-  const requiredDirs = [
-    'apps/web',
-    'packages/ocr-core'
-  ];
+  const requiredDirs = ['apps/web', 'packages/ocr-core'];
 
   let allExist = true;
   for (const dir of requiredDirs) {
@@ -115,7 +111,7 @@ function checkTsConfigBase() {
 
   try {
     const tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, 'utf-8'));
-    
+
     // 필수 설정 확인
     const requiredOptions = ['target', 'lib', 'module', 'moduleResolution'];
     for (const option of requiredOptions) {
@@ -167,28 +163,25 @@ function checkTurboJson() {
 // 메인 실행
 console.log('\n🔍 0단계 프로젝트 설계 검증 시작...\n');
 
-const results = [
-  checkNodeVersion(),
-  checkPackageJson(),
-  checkDirectoryStructure(),
-  checkTsConfigBase(),
-  checkTurboJson()
-];
+checkNodeVersion();
+checkPackageJson();
+checkDirectoryStructure();
+checkTsConfigBase();
+checkTurboJson();
 
 console.log('\n' + '='.repeat(50));
 
 if (warnings.length > 0) {
   console.log('\n⚠️  경고:');
-  warnings.forEach(w => console.log(`  ${w}`));
+  warnings.forEach((w) => console.log(`  ${w}`));
 }
 
 if (errors.length > 0) {
   console.log('\n❌ 오류:');
-  errors.forEach(e => console.log(`  ${e}`));
+  errors.forEach((e) => console.log(`  ${e}`));
   console.log('\n❌ 검증 실패: 일부 항목이 올바르게 설정되지 않았습니다.\n');
   process.exit(1);
 } else {
   console.log('\n✅ 모든 검증 통과! 0단계 설계가 올바르게 완료되었습니다.\n');
   process.exit(0);
 }
-
