@@ -77,6 +77,38 @@
 
 ## 2. `packages/ocr-core` – 클라이언트 OCR 라이브러리 (TDD 핵심)
 
+### 2-0. OCR 엔진 및 파일 타입 처리 전략 확정
+
+- [ ] **브라우저 OCR 스택 1차 확정 (기술 검토 메모 작성)**
+  - 후보 스택
+    - OCR 엔진: `tesseract.js`
+    - PDF 렌더링: `pdfjs-dist` (Mozilla PDF.js)
+    - Office 변환(Word/Excel/PPT):
+      - 1차 후보: `@pdftron/webviewer` (Apryse WebViewer, client-only 모드)
+      - 2차 후보: `@nutrient-sdk/viewer` (Nutrient Web SDK)
+
+  - Red:
+    - [ ] `ocr-core` 패키지에서 위 세 가지를 **의존성으로 추가하지 않은 상태**에서,
+          "OCR 엔진/렌더러/Office 변환기가 설정되지 않았다"는 의미의 에러를 던지는 테스트 작성  
+           (예: `getOcrConfig()` 호출 시 필수 필드 누락으로 실패하는 테스트)
+
+  - Green:
+    - [ ] `packages/ocr-core`에 `OcrEngineConfig` 인터페이스 정의
+      ```ts
+      interface OcrEngineConfig {
+        ocrEngine: 'tesseract-js';
+        pdfRenderer: 'pdfjs';
+        officeIntegration?: 'apryse-webviewer' | 'nutrient-websdk';
+      }
+      ```
+    - [ ] 기본값으로 `ocrEngine: 'tesseract-js'`, `pdfRenderer: 'pdfjs'` 설정
+    - [ ] Office 통합은 `undefined`로 두고, 활성화 여부를 런타임에서 체크하도록 설계
+
+  - Refactor:
+    - [ ] `config/ocrConfig.ts`로 분리하고, 나중에 EP별/고객사별로 플러그인 교체 가능하도록 구조화
+
+---
+
 ### 2-1. 패키지 스캐폴딩
 
 - [ ] **ocr-core 패키지 생성**
@@ -151,6 +183,98 @@
     - [ ] 타임아웃 옵션 구현 (`OcrOptions`에 `timeoutMs` 추가 고려)
   - Refactor:
     - [ ] 에러 타입(`OcrError`) 정의 및 일관된 에러 메시지 전략 수립
+
+---
+
+### 2-5. 파일 타입별 OCR 파이프라인 구현 (Word/Excel/PPT/PDF/이미지)
+
+- [ ] **파일 타입 식별 유틸 구현 (`detectFileType`)**
+  - Red:
+    - [ ] `detectFileType(file: File)`에 대해 다음 확장자를 정확히 매핑하는 테스트 작성
+      - `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp` → `"image"`
+      - `.pdf` → `"pdf"`
+      - `.doc`, `.docx` → `"word"`
+      - `.xls`, `.xlsx` → `"excel"`
+      - `.ppt`, `.pptx` → `"ppt"`
+    - [ ] 미지원 확장자는 `"unknown"` 또는 에러를 반환하는지 테스트
+
+  - Green:
+    - [ ] MIME 타입 + 확장자 기반 간단 구현
+  - Refactor:
+    - [ ] 추후 컨피그 기반으로 커스터마이징 가능하도록 `FILE_TYPE_MAP` 분리
+
+---
+
+- [ ] **이미지 OCR 파이프라인 (`processImageWithOcr`) – Tesseract.js**
+  - Red:
+    - [ ] 샘플 이미지 fixture를 사용하여 `processImageWithOcr` 호출 시,
+          `OcrResult.text`에 특정 문자열(예: `"CORENEXUS"`)이 포함되는지 테스트 (스냅샷 테스트 가능)
+  - Green:
+    - [ ] `tesseract.js`를 사용해 `File | Blob | HTMLCanvasElement`를 입력받아 OCR 수행하는 함수 구현
+      ```ts
+      async function processImageWithOcr(
+        input: OcrInput,
+        options?: OcrOptions
+      ): Promise<OcrResult> {
+        // 내부에서 Tesseract.js 호출
+      }
+      ```
+  - Refactor:
+    - [ ] Web Worker 사용 여부 옵션 (`useWorker`) 추가하여 메인 스레드 블로킹 최소화
+
+---
+
+- [ ] **PDF OCR 파이프라인 (`processPdfWithOcr`) – PDF.js + Tesseract.js**
+  - Red:
+    - [ ] 텍스트 기반 PDF 샘플에 대해:
+      - 1단계: PDF.js 텍스트 레이어로 텍스트를 읽어오는 테스트 작성
+      - 2단계: 스캔 PDF 샘플에 대해, 페이지를 이미지로 렌더링 후 Tesseract.js로 특정 키워드가 나오는지 테스트
+  - Green:
+    - [ ] `pdfjs-dist`를 이용해 PDF 페이지를 canvas에 렌더링
+    - [ ] 각 페이지를 `processImageWithOcr`로 전달하여 OCR 수행
+    - [ ] 결과를 페이지별로 합쳐서 `OcrResult` 형태로 반환
+  - Refactor:
+    - [ ] "텍스트 레이어 우선, 실패 시 OCR fallback" 전략으로 최적화
+    - [ ] 페이지 병렬 처리(WorkerPool) 도입 고려
+
+---
+
+- [ ] **Word/Excel/PPT 파일 파이프라인 (Office → PDF → OCR)**
+  - Red:
+    - [ ] `officeIntegration`이 설정되지 않은 상태에서
+          `.docx` 파일을 `processFileWithOcr`에 넣으면,
+          "Office 통합 미구현" 에러가 발생하는지 테스트
+  - Green:
+    - [ ] `officeIntegration === 'apryse-webviewer'` 인 경우:
+      - WebViewer SDK를 사용하여 업로드된 `docx/xlsx/pptx`를 브라우저에서 PDF로 변환
+      - 변환된 PDF Blob을 `processPdfWithOcr`에 전달
+    - [ ] `officeIntegration === 'nutrient-websdk'` 인 경우:
+      - Nutrient SDK로 동일한 흐름 구현 (인터페이스는 추후 어댑터로 통합)
+  - Refactor:
+    - [ ] `OfficeToPdfAdapter` 인터페이스 정의
+      ```ts
+      interface OfficeToPdfAdapter {
+        canHandle(mimeType: string): boolean;
+        convertToPdf(file: File): Promise<Blob>; // PDF Blob
+      }
+      ```
+    - [ ] `ApryseOfficeToPdfAdapter`, `NutrientOfficeToPdfAdapter` 구현하고
+          DI 형태로 `ocr-core`에 주입 가능하도록 설계
+
+---
+
+- [ ] **상위 통합 API: `processFileWithOcr(file: File, options?: OcrOptions)`**
+  - Red:
+    - [ ] 다양한 확장자(`jpg`, `pdf`, `docx`, `xlsx`, `pptx`)에 대해
+          내부적으로 올바른 파이프라인이 호출되는지 단위 테스트
+  - Green:
+    - [ ] `detectFileType` 결과에 따라 분기 처리
+      - `"image"` → `processImageWithOcr`
+      - `"pdf"` → `processPdfWithOcr`
+      - `"word" | "excel" | "ppt"` → Office → PDF 변환 후 `processPdfWithOcr`
+  - Refactor:
+    - [ ] 추후 기타 포맷(HWP, TIFF 등)을 플러그인 방식으로 추가할 수 있도록
+          `FileTypeHandler` 인터페이스 추상화
 
 ---
 
