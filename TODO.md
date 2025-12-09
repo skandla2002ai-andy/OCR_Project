@@ -1,9 +1,10 @@
 # TODO – OCR Web Monorepo (Node 22 + React 18 + Turborepo + TDD)
 
-> 목표  
-> - Client 단에서 동작하는 OCR 라이브러리(`@core-nexus/ocr-core`)를 만들고  
-> - 이를 사용하는 React 18 웹앱(`web`)을 Turborepo 기반 mono repo로 구성  
-> - Node.js 22, TypeScript, TDD(테스트 주도 개발)를 원칙으로 개발  
+> 목표
+>
+> - Client 단에서 동작하는 OCR 라이브러리(`@core-nexus/ocr-core`)를 만들고
+> - 이를 사용하는 React 18 웹앱(`web`)을 Turborepo 기반 mono repo로 구성
+> - Node.js 22, TypeScript, TDD(테스트 주도 개발)를 원칙으로 개발
 > - Cursor를 활용해 TODO 기반으로 작업을 쪼개서 진행
 
 ---
@@ -37,40 +38,40 @@
 
 ### 1-1. Turborepo 초기화
 
-- [ ] **Turborepo 워크스페이스 초기화**
+- [x] **Turborepo 워크스페이스 초기화**
   - Red:
-    - [ ] `package.json`의 `workspaces` 설정에 `apps/*`, `packages/*`가 포함되어 있는지 테스트 스크립트로 검증  
-          (예: 간단한 Node 스크립트로 `package.json`을 읽어와 workspaces 배열을 체크)
+    - [x] `package.json`의 `workspaces` 설정에 `apps/*`, `packages/*`가 포함되어 있는지 테스트 스크립트로 검증  
+           (예: 간단한 Node 스크립트로 `package.json`을 읽어와 workspaces 배열을 체크)
   - Green:
-    - [ ] `pnpm init` 또는 `npm init` 후 Turborepo 템플릿 적용 (`npx create-turbo@latest` 참고)
-    - [ ] `turbo.json` 생성 및 `build`, `lint`, `test`, `dev` 파이프라인 정의
+    - [x] `pnpm init` 또는 `npm init` 후 Turborepo 템플릿 적용 (`npx create-turbo@latest` 참고)
+    - [x] `turbo.json` 생성 및 `build`, `lint`, `test`, `dev` 파이프라인 정의
   - Refactor:
-    - [ ] `scripts` 및 `turbo.json`내 job 이름을 일관성 있게 정리 (`build`, `test`, `lint`, `dev`)
+    - [x] `scripts` 및 `turbo.json`내 job 이름을 일관성 있게 정리 (`build`, `test`, `lint`, `dev`)
 
 ### 1-2. Node 22 & TS 공통 설정
 
-- [ ] **Node 22 엔진 명시 및 TS 베이스 설정**
+- [x] **Node 22 엔진 명시 및 TS 베이스 설정**
   - Red:
-    - [ ] `node -v` 실행 결과를 체크하는 스크립트 또는 문서화된 체크리스트 추가
-    - [ ] 루트 `tsconfig.base.json` 존재 여부 테스트 (파일 존재 테스트)
+    - [x] `node -v` 실행 결과를 체크하는 스크립트 또는 문서화된 체크리스트 추가
+    - [x] 루트 `tsconfig.base.json` 존재 여부 테스트 (파일 존재 테스트)
   - Green:
-    - [ ] `package.json`에 `"engines": { "node": ">=22" }` 추가
-    - [ ] 루트에 `tsconfig.base.json` 생성, 공통 설정 정의
+    - [x] `package.json`에 `"engines": { "node": ">=22" }` 추가
+    - [x] 루트에 `tsconfig.base.json` 생성, 공통 설정 정의
       - `moduleResolution`, `target`, `lib: ["ES2022", "DOM"]` 등
   - Refactor:
-    - [ ] `apps/web`, `packages/ocr-core`에서 루트 `tsconfig.base.json`을 확장하도록 정리
+    - [x] `apps/web`, `packages/ocr-core`에서 루트 `tsconfig.base.json`을 확장하도록 정리
 
 ### 1-3. 공통 개발툴 (ESLint / Prettier / Husky 등)
 
-- [ ] **코드 품질 도구 세팅**
+- [x] **코드 품질 도구 세팅**
   - Red:
-    - [ ] 잘못된 코드 스타일이 있을 경우 lint가 실패하는지 확인하는 최소 lint 테스트 추가
+    - [x] 잘못된 코드 스타일이 있을 경우 lint가 실패하는지 확인하는 최소 lint 테스트 추가
   - Green:
-    - [ ] ESLint + TypeScript 설정 (`@typescript-eslint/*`) 추가
-    - [ ] Prettier 설정 추가 및 ESLint와 연동
-    - [ ] 필요 시 Husky + lint-staged로 pre-commit 훅 설정
+    - [x] ESLint + TypeScript 설정 (`@typescript-eslint/*`) 추가
+    - [x] Prettier 설정 추가 및 ESLint와 연동
+    - [x] 필요 시 Husky + lint-staged로 pre-commit 훅 설정
   - Refactor:
-    - [ ] 모든 workspace에서 공통 `.eslintrc`, `.prettierrc`를 재사용하도록 구조 정리
+    - [x] 모든 workspace에서 공통 `.eslintrc`, `.prettierrc`를 재사용하도록 구조 정리
 
 ---
 
@@ -95,10 +96,11 @@
 
 - [ ] **핵심 API 시그니처 정의**
   - 제안 API:
+
     ```ts
     type OcrInput = File | Blob | ArrayBuffer | string; // URL or base64
     interface OcrOptions {
-      language?: string;        // "eng", "kor", ...
+      language?: string; // "eng", "kor", ...
       detectOrientation?: boolean;
       enhanceContrast?: boolean;
     }
@@ -115,11 +117,9 @@
       confidence: number;
     }
 
-    declare function recognize(
-      input: OcrInput,
-      options?: OcrOptions
-    ): Promise<OcrResult>;
+    declare function recognize(input: OcrInput, options?: OcrOptions): Promise<OcrResult>;
     ```
+
   - Red:
     - [ ] 위 형태의 타입을 기대하는 유닛 테스트 작성 (타입 레벨 + 런타임 에러 테스트)
   - Green:
