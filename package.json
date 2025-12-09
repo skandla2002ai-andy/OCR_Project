@@ -1,0 +1,26 @@
+{
+  "name": "ocr-web-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OCR Web Monorepo with Node 22 + React 18 + Turborepo + TDD",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "verify:setup": "node scripts/verify-setup.js"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}
+
