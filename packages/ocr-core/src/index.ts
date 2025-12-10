@@ -66,3 +66,4 @@ export async function recognize(input: unknown, options: OcrOptions = {}): Promi
 export * from './types';
 export * from './errors';
 export * from './engine';
+export * from './config/ocrConfig';

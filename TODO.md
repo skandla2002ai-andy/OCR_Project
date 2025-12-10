@@ -79,7 +79,7 @@
 
 ### 2-0. OCR 엔진 및 파일 타입 처리 전략 확정
 
-- [ ] **브라우저 OCR 스택 1차 확정 (기술 검토 메모 작성)**
+- [x] **브라우저 OCR 스택 1차 확정 (기술 검토 메모 작성)**
   - 후보 스택
     - OCR 엔진: `tesseract.js`
     - PDF 렌더링: `pdfjs-dist` (Mozilla PDF.js)
@@ -88,12 +88,12 @@
       - 2차 후보: `@nutrient-sdk/viewer` (Nutrient Web SDK)
 
   - Red:
-    - [ ] `ocr-core` 패키지에서 위 세 가지를 **의존성으로 추가하지 않은 상태**에서,
+    - [x] `ocr-core` 패키지에서 위 세 가지를 **의존성으로 추가하지 않은 상태**에서,
           "OCR 엔진/렌더러/Office 변환기가 설정되지 않았다"는 의미의 에러를 던지는 테스트 작성  
            (예: `getOcrConfig()` 호출 시 필수 필드 누락으로 실패하는 테스트)
 
   - Green:
-    - [ ] `packages/ocr-core`에 `OcrEngineConfig` 인터페이스 정의
+    - [x] `packages/ocr-core`에 `OcrEngineConfig` 인터페이스 정의
       ```ts
       interface OcrEngineConfig {
         ocrEngine: 'tesseract-js';
@@ -101,11 +101,11 @@
         officeIntegration?: 'apryse-webviewer' | 'nutrient-websdk';
       }
       ```
-    - [ ] 기본값으로 `ocrEngine: 'tesseract-js'`, `pdfRenderer: 'pdfjs'` 설정
-    - [ ] Office 통합은 `undefined`로 두고, 활성화 여부를 런타임에서 체크하도록 설계
+    - [x] 기본값으로 `ocrEngine: 'tesseract-js'`, `pdfRenderer: 'pdfjs'` 설정
+    - [x] Office 통합은 `undefined`로 두고, 활성화 여부를 런타임에서 체크하도록 설계
 
   - Refactor:
-    - [ ] `config/ocrConfig.ts`로 분리하고, 나중에 EP별/고객사별로 플러그인 교체 가능하도록 구조화
+    - [x] `config/ocrConfig.ts`로 분리하고, 나중에 EP별/고객사별로 플러그인 교체 가능하도록 구조화
 
 ---
 
