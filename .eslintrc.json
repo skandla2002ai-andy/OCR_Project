@@ -7,8 +7,7 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": "./tsconfig.base.json",
-    "tsconfigRootDir": "."
+    "project": "./tsconfig.base.json"
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
@@ -42,11 +41,23 @@
         "no-undef": "off",
         "no-console": "off",
         "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-return": "off",
         "@typescript-eslint/no-unsafe-argument": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "parserOptions": {
+        "project": ["./apps/web/tsconfig.test.json", "./packages/*/tsconfig.test.json"]
+      },
+      "rules": {
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off"
       }
     }
   ],
