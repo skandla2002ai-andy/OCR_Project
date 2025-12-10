@@ -1,8 +1,9 @@
 import type { OcrInput, OcrOptions, OcrResult } from './types';
 import { OcrError } from './errors';
-import { StubEngine } from './engine';
+import { TesseractEngine } from './engine';
+import { getOcrConfig } from './config/ocrConfig';
 
-const stubEngine = new StubEngine();
+const tesseractEngine = new TesseractEngine();
 
 function isArrayBuffer(input: unknown): input is ArrayBuffer {
   return typeof ArrayBuffer !== 'undefined' && input instanceof ArrayBuffer;
@@ -59,11 +60,23 @@ async function stubWork(): Promise<OcrResult> {
  */
 export async function recognize(input: unknown, options: OcrOptions = {}): Promise<OcrResult> {
   validateInput(input);
-  const work = stubEngine.recognize(input, options ?? {});
-  return withTimeout(work ?? stubWork(), options.timeoutMs);
+  const config = getOcrConfig();
+
+  // Use TesseractEngine if configured (default)
+  if (config.ocrEngine === 'tesseract-js') {
+    const work = tesseractEngine.recognize(input, options ?? {});
+    return withTimeout(work, options.timeoutMs);
+  }
+
+  // Fallback to stub for testing
+  return withTimeout(stubWork(), options.timeoutMs);
 }
 
 export * from './types';
 export * from './errors';
 export * from './engine';
 export * from './config/ocrConfig';
+export * from './utils/fileType';
+export * from './pipelines/imagePipeline';
+export * from './pipelines/pdfPipeline';
+export * from './pipelines/filePipeline';
