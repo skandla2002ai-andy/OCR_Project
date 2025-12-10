@@ -111,22 +111,22 @@
 
 ### 2-1. 패키지 스캐폴딩
 
-- [ ] **ocr-core 패키지 생성**
+- [x] **ocr-core 패키지 생성**
   - Red:
-    - [ ] `import { recognize } from "@core-nexus/ocr-core"` 호출 시 TypeScript가 타입을 인식하는지 테스트 (d.ts 체크)
+    - [x] `import { recognize } from "@core-nexus/ocr-core"` 호출 시 TypeScript가 타입을 인식하는지 테스트 (d.ts 체크)
   - Green:
-    - [ ] `packages/ocr-core/package.json` 생성
+    - [x] `packages/ocr-core/package.json` 생성
       - `"name": "@core-nexus/ocr-core"`
       - `"main": "dist/index.cjs"`
       - `"module": "dist/index.mjs"`
       - `"types": "dist/index.d.ts"`
-    - [ ] `src/index.ts` 및 기본 폴더 구조 생성
+    - [x] `src/index.ts` 및 기본 폴더 구조 생성
   - Refactor:
-    - [ ] 빌드 설정을 `tsup` 또는 `rollup` 등으로 통일된 형태로 정리
+    - [x] 빌드 설정을 `tsup` 또는 `rollup` 등으로 통일된 형태로 정리
 
 ### 2-2. OCR API 설계 (도메인 모델 + TDD)
 
-- [ ] **핵심 API 시그니처 정의**
+- [x] **핵심 API 시그니처 정의**
   - 제안 API:
 
     ```ts
@@ -153,11 +153,11 @@
     ```
 
   - Red:
-    - [ ] 위 형태의 타입을 기대하는 유닛 테스트 작성 (타입 레벨 + 런타임 에러 테스트)
+    - [x] 위 형태의 타입을 기대하는 유닛 테스트 작성 (타입 레벨 + 런타임 에러 테스트)
   - Green:
-    - [ ] `recognize` 함수를 stub 구현 (임시로 고정된 결과 반환)
+    - [x] `recognize` 함수를 stub 구현 (임시로 고정된 결과 반환)
   - Refactor:
-    - [ ] 타입을 `types.ts`로 분리하고 index에서 re-export
+    - [x] 타입을 `types.ts`로 분리하고 index에서 re-export
 
 ### 2-3. OCR 엔진 연동 (예: Tesseract.js 또는 WASM)
 
@@ -174,15 +174,15 @@
 
 ### 2-4. 에러 및 성능 옵션
 
-- [ ] **에러 처리 및 타임아웃 옵션 추가**
+- [x] **에러 처리 및 타임아웃 옵션 추가**
   - Red:
-    - [ ] 지원하지 않는 입력 타입일 때 에러가 발생하는 테스트
-    - [ ] 일정 시간(예: 10초) 이상 걸리면 타임아웃 에러가 발생하는 테스트
+    - [x] 지원하지 않는 입력 타입일 때 에러가 발생하는 테스트
+    - [x] 일정 시간(예: 10초) 이상 걸리면 타임아웃 에러가 발생하는 테스트
   - Green:
-    - [ ] 입력 검증 및 예외 처리 로직 구현
-    - [ ] 타임아웃 옵션 구현 (`OcrOptions`에 `timeoutMs` 추가 고려)
+    - [x] 입력 검증 및 예외 처리 로직 구현
+    - [x] 타임아웃 옵션 구현 (`OcrOptions`에 `timeoutMs` 추가 고려)
   - Refactor:
-    - [ ] 에러 타입(`OcrError`) 정의 및 일관된 에러 메시지 전략 수립
+    - [x] 에러 타입(`OcrError`) 정의 및 일관된 에러 메시지 전략 수립
 
 ---
 
@@ -282,14 +282,14 @@
 
 ### 3-1. React 앱 스캐폴딩
 
-- [ ] **React 18 + Vite 앱 생성**
+- [x] **React 18 + Vite 앱 생성**
   - Red:
-    - [ ] 루트 경로(`/`) 렌더링 시 "OCR Web App" 텍스트가 포함되는지 테스트 (React Testing Library)
+    - [x] 루트 경로(`/`) 렌더링 시 "OCR Web App" 텍스트가 포함되는지 테스트 (React Testing Library)
   - Green:
-    - [ ] `apps/web`에 Vite + React + TS 템플릿 생성
-    - [ ] `pnpm dev --filter web` 또는 `turbo dev`로 앱 실행 가능하게 설정
+    - [x] `apps/web`에 Vite + React + TS 템플릿 생성
+    - [x] `pnpm dev --filter web` 또는 `turbo dev`로 앱 실행 가능하게 설정
   - Refactor:
-    - [ ] 기본 템플릿 코드 정리, 불필요한 파일 제거
+    - [x] 기본 템플릿 코드 정리, 불필요한 파일 제거
 
 ### 3-2. UI 기본 흐름 정의 (업로드 → OCR → 결과 표시)
 
