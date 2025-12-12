@@ -1,12 +1,142 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background: #f7f7f9;
-  color: #111;
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
   min-height: 100vh;
 }
 
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.ocr-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.control-panel {
+  background: #333;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.options-panel {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem;
+  border: 2px dashed #666;
+  border-radius: 12px;
+}
+
+.file-label {
+  padding: 10px 20px;
+  background-color: #646cff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.action-section {
+  display: flex;
+  justify-content: center;
+}
+
+.recognize-btn {
+  background-color: #42b883;
+  color: white;
+  padding: 12px 24px;
+  font-size: 1.2rem;
+}
+
+.recognize-btn:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.result-section {
+  background: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.ocr-text {
+  white-space: pre-wrap;
+  font-family: monospace;
+  background: #000;
+  padding: 1rem;
+  border-radius: 4px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.error-message {
+  color: #ff4444;
+  background: #330000;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}

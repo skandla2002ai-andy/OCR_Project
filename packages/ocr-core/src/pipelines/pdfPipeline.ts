@@ -33,7 +33,13 @@ async function renderPdfPageToBlob(pdfData: ArrayBuffer, pageNum: number): Promi
   canvas.width = viewport.width;
   canvas.height = viewport.height;
 
-  await page.render({ canvasContext: context, viewport }).promise;
+  const renderContext = {
+    canvasContext: context,
+    viewport,
+  };
+
+  // @ts-expect-error - 'canvas' property check in types is too strict for pdfjs-dist
+  await page.render(renderContext).promise;
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob!), 'image/png');
@@ -44,11 +50,13 @@ async function convertInputToArrayBuffer(input: OcrInput): Promise<ArrayBuffer> 
   if (input instanceof ArrayBuffer) {
     return input;
   }
-  if (input instanceof Blob || input instanceof File) {
+  // @ts-expect-error - Check for Blob/File which might not be in Node env types but exist in DOM
+  if (typeof Blob !== 'undefined' && (input instanceof Blob || input instanceof File)) {
+    // @ts-expect-error - arrayBuffer method exists on Blob/File in DOM but may not be typed in all environments
     return input.arrayBuffer();
   }
   // string (URL or base64) - fetch or decode
-  if (input.startsWith('data:')) {
+  if (typeof input === 'string' && input.startsWith('data:')) {
     const base64 = input.split(',')[1];
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
@@ -58,8 +66,12 @@ async function convertInputToArrayBuffer(input: OcrInput): Promise<ArrayBuffer> 
     return bytes.buffer;
   }
   // Assume URL
-  const response = await fetch(input);
-  return response.arrayBuffer();
+  if (typeof input === 'string') {
+    const response = await fetch(input);
+    return response.arrayBuffer();
+  }
+
+  throw new Error('Unsupported input type for PDF processing');
 }
 
 /**

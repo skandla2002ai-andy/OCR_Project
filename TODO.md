@@ -293,29 +293,29 @@
 
 ### 3-2. UI 기본 흐름 정의 (업로드 → OCR → 결과 표시)
 
-- [ ] **기본 OCR 플로우 컴포넌트 구현**
+- [x] **기본 OCR 플로우 컴포넌트 구현**
   - Red:
-    - [ ] 사용자가 이미지를 선택 → "인식하기" 버튼 클릭 시
+    - [x] 사용자가 이미지를 선택 → "인식하기" 버튼 클릭 시
       - 로딩 스피너가 표시되고
       - OCR 결과 텍스트 영역이 존재하는지 테스트
   - Green:
-    - [ ] `OcrUploader` 컴포넌트 구현
+    - [x] `OcrUploader` 컴포넌트 구현
       - 이미지 업로드 input
       - "인식하기" 버튼
-    - [ ] `@core-nexus/ocr-core`의 `recognize`를 호출하여 결과 표시
+    - [x] `@core-nexus/ocr-core`의 `recognize`를 호출하여 결과 표시
   - Refactor:
-    - [ ] UI 상태를 `useReducer` 또는 상태관리 라이브러리로 정리(필요 시 Zustand 등)
+    - [x] UI 상태를 `useReducer` 또는 상태관리 라이브러리로 정리(필요 시 Zustand 등)
 
 ### 3-3. 옵션 설정 UI (language / 옵션)
 
-- [ ] **OCR 옵션 설정 패널**
+- [x] **OCR 옵션 설정 패널**
   - Red:
-    - [ ] 언어 드롭다운에서 언어 변경 시, 내부 상태에 반영되는지 테스트
+    - [x] 언어 드롭다운에서 언어 변경 시, 내부 상태에 반영되는지 테스트
   - Green:
-    - [ ] `language`, `detectOrientation`, `enhanceContrast`를 설정할 수 있는 패널 구현
-    - [ ] 해당 옵션이 `recognize` 호출 시 전달되는지 연결
+    - [x] `language`, `detectOrientation`, `enhanceContrast`를 설정할 수 있는 패널 구현
+    - [x] 해당 옵션이 `recognize` 호출 시 전달되는지 연결
   - Refactor:
-    - [ ] 옵션 상태를 별도 훅(`useOcrOptions`)으로 분리
+    - [x] 옵션 상태를 별도 훅(`useOcrOptions`)으로 분리
 
 ---
 
@@ -323,10 +323,10 @@
 
 ### 4-1. TDD 사이클 템플릿 만들기
 
-- [ ] **TDD 작업 단위 템플릿 정의**
-  - [ ] `docs/TDD-GUIDE.md` 생성 (추후)
+- [x] **TDD 작업 단위 템플릿 정의**
+  - [x] `docs/TDD-GUIDE.md` 생성 (추후)
     - 각 TODO 항목에 대해 다음 순서로 진행:
       1. Red: 실패하는 테스트 작성
       2. Green: 최소 구현으로 테스트 통과
       3. Refactor: 구조/이름/중복 개선
-  - [ ] Cursor에서
+  - [x] Cursor에서 사용 가능한 프롬프트 가이드 포함
