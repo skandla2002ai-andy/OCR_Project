@@ -50,25 +50,28 @@ async function convertInputToArrayBuffer(input: OcrInput): Promise<ArrayBuffer> 
   if (input instanceof ArrayBuffer) {
     return input;
   }
-  // @ts-expect-error - Check for Blob/File which might not be in Node env types but exist in DOM
-  if (typeof Blob !== 'undefined' && (input instanceof Blob || input instanceof File)) {
-    // @ts-expect-error - arrayBuffer method exists on Blob/File in DOM but may not be typed in all environments
-    return input.arrayBuffer();
-  }
-  // string (URL or base64) - fetch or decode
-  if (typeof input === 'string' && input.startsWith('data:')) {
-    const base64 = input.split(',')[1];
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
-  // Assume URL
+
+  // Handle string inputs (URL or base64)
   if (typeof input === 'string') {
+    if (input.startsWith('data:')) {
+      // base64 decode
+      const base64 = input.split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+    // Assume URL
     const response = await fetch(input);
     return response.arrayBuffer();
+  }
+
+  // Handle Blob/File
+  if (typeof Blob !== 'undefined') {
+    // Type assertion: at this point input must be Blob or File (not string or ArrayBuffer)
+    return input.arrayBuffer();
   }
 
   throw new Error('Unsupported input type for PDF processing');
