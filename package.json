@@ -12,6 +12,7 @@
   },
   "packageManager": "pnpm@9.0.0",
   "scripts": {
+    "start": "pnpm run dev:web",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
@@ -20,8 +21,10 @@
     "test:core": "pnpm --filter @core-nexus/ocr-core test",
     "test:web": "pnpm --filter web test",
     "dev:web": "pnpm --filter web dev",
+    "dev:full": "pnpm run build:core && pnpm run dev:web",
     "build:core": "pnpm --filter @core-nexus/ocr-core build",
     "build:web": "pnpm --filter web build",
+    "preview:web": "pnpm --filter web preview",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean",
