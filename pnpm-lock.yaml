@@ -47,6 +47,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@core-nexus/ocr-core':
+        specifier: workspace:*
+        version: link:../../packages/ocr-core
       react:
         specifier: ^18.3.1
         version: 18.3.1
