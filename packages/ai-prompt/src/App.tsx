@@ -29,7 +29,7 @@ export default function App() {
   useEffect(() => {
     void getSettings().then((s) => {
       setSettings(s);
-      if (!s.apiKey && s.apiEndpointMode === 'anthropic') {
+      if (s.provider === 'anthropic' && !s.anthropicApiKey) {
         setShowSettings(true);
       }
     });
