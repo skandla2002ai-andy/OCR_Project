@@ -17,7 +17,9 @@ export function MessageList({ messages, streamingContent }: Props) {
     return (
       <div className="message-empty">
         <p>새 대화를 시작하세요.</p>
-        <p className="message-empty-hint">텍스트 입력 또는 이미지 붙여넣기(Ctrl+V)를 지원합니다.</p>
+        <p className="message-empty-hint">
+          텍스트 · 이미지(Ctrl+V) · PDF 드래그 앤 드롭을 지원합니다.
+        </p>
       </div>
     );
   }
@@ -46,9 +48,18 @@ function MessageBubble({ message }: { message: Message }) {
   return (
     <div className={`message-bubble ${message.role}`}>
       <span className="message-role">{isUser ? '나' : 'AI'}</span>
+
       {message.images?.map((img) => (
         <img key={img.id} src={img.dataUrl} alt={img.name} className="message-image" />
       ))}
+
+      {message.pdfs?.map((pdf) => (
+        <div key={pdf.id} className="message-pdf-chip">
+          📄 {pdf.name}
+          <span className="message-pdf-pages">{pdf.pageCount}p</span>
+        </div>
+      ))}
+
       <div className="message-content">{message.content}</div>
     </div>
   );

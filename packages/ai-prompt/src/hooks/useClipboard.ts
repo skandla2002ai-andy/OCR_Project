@@ -13,6 +13,7 @@ async function fileToAttachment(file: File): Promise<ImageAttachment> {
     const reader = new FileReader();
     reader.onload = () => {
       resolve({
+        kind: 'image',
         id: crypto.randomUUID(),
         name: file.name || 'pasted-image',
         dataUrl: reader.result as string,

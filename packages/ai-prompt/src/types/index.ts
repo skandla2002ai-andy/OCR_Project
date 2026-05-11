@@ -3,11 +3,32 @@ export type AIModel = 'claude-opus-4-7' | 'claude-sonnet-4-6' | 'claude-haiku-4-
 export type MessageRole = 'user' | 'assistant' | 'system';
 
 export interface ImageAttachment {
+  kind: 'image';
   id: string;
   name: string;
   dataUrl: string;
   mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
   size: number;
+}
+
+export interface PdfAttachment {
+  kind: 'pdf';
+  id: string;
+  name: string;
+  size: number;
+  blobUrl: string; // object URL for <iframe> preview (revoke on remove)
+  pageCount: number;
+  text: string; // extracted text → injected into AI message
+}
+
+export type FileAttachment = ImageAttachment | PdfAttachment;
+
+export function isPdf(a: FileAttachment): a is PdfAttachment {
+  return a.kind === 'pdf';
+}
+
+export function isImage(a: FileAttachment): a is ImageAttachment {
+  return a.kind === 'image';
 }
 
 export interface Message {
@@ -16,6 +37,7 @@ export interface Message {
   role: MessageRole;
   content: string;
   images?: ImageAttachment[];
+  pdfs?: Pick<PdfAttachment, 'id' | 'name' | 'pageCount'>[];
   createdAt: Date;
   isStreaming?: boolean;
 }
@@ -33,28 +55,18 @@ export type ApiProvider =
   | 'anthropic' // Anthropic 직접 (API 키)
   | 'proxy' // 자체 서버 프록시 (SSE)
   | 'ollama' // 로컬 Ollama (키 없음)
-  | 'openai'; // OpenAI / 호환 API (LM Studio, vLLM 등)
+  | 'openai'; // OpenAI / 호환 API
 
 export interface AppSettings {
   provider: ApiProvider;
-
-  // Anthropic 직접
   anthropicApiKey: string;
-
-  // 서버 프록시
   proxyEndpoint: string;
-
-  // Ollama
   ollamaBaseUrl: string;
   ollamaModel: string;
-
-  // OpenAI / 호환
   openaiApiKey: string;
   openaiBaseUrl: string;
   openaiModel: string;
-
-  // 공통
-  model: AIModel; // Anthropic/proxy 전용 모델 선택
+  model: AIModel;
   maxTokens: number;
   systemPrompt: string;
   temperature: number;
