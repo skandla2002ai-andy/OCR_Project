@@ -161,16 +161,16 @@
 
 ### 2-3. OCR 엔진 연동 (예: Tesseract.js 또는 WASM)
 
-- [ ] **외부 OCR 엔진 선택 및 래핑**
+- [x] **외부 OCR 엔진 선택 및 래핑**
   - Red:
-    - [ ] 예시 이미지(샘플 fixture)를 입력했을 때, 특정 키워드가 결과 텍스트에 포함되는지 확인하는 테스트 작성
+    - [x] 예시 이미지(샘플 fixture)를 입력했을 때, 특정 키워드가 결과 텍스트에 포함되는지 확인하는 테스트 작성
       - 실제 이미지 파일은 `packages/ocr-core/test/fixtures/sample.png` 등으로 관리
   - Green:
-    - [ ] Tesseract.js 혹은 선택한 OCR 엔진을 `recognize` 내부에서 호출
-    - [ ] 입력 타입(File/Blob/URL/base64)을 엔진이 처리 가능한 포맷으로 변환
+    - [x] Tesseract.js 혹은 선택한 OCR 엔진을 `recognize` 내부에서 호출
+    - [x] 입력 타입(File/Blob/URL/base64)을 엔진이 처리 가능한 포맷으로 변환
   - Refactor:
-    - [ ] OCR 엔진 어댑터 패턴 도입 (`OcrEngineAdapter` 인터페이스)
-    - [ ] 나중에 엔진 변경/추가가 쉽도록 구조화
+    - [x] OCR 엔진 어댑터 패턴 도입 (`OcrEngineAdapter` 인터페이스)
+    - [x] 나중에 엔진 변경/추가가 쉽도록 구조화
 
 ### 2-4. 에러 및 성능 옵션
 
@@ -188,29 +188,29 @@
 
 ### 2-5. 파일 타입별 OCR 파이프라인 구현 (Word/Excel/PPT/PDF/이미지)
 
-- [ ] **파일 타입 식별 유틸 구현 (`detectFileType`)**
+- [x] **파일 타입 식별 유틸 구현 (`detectFileType`)**
   - Red:
-    - [ ] `detectFileType(file: File)`에 대해 다음 확장자를 정확히 매핑하는 테스트 작성
+    - [x] `detectFileType(file: File)`에 대해 다음 확장자를 정확히 매핑하는 테스트 작성
       - `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp` → `"image"`
       - `.pdf` → `"pdf"`
       - `.doc`, `.docx` → `"word"`
       - `.xls`, `.xlsx` → `"excel"`
       - `.ppt`, `.pptx` → `"ppt"`
-    - [ ] 미지원 확장자는 `"unknown"` 또는 에러를 반환하는지 테스트
+    - [x] 미지원 확장자는 `"unknown"` 또는 에러를 반환하는지 테스트
 
   - Green:
-    - [ ] MIME 타입 + 확장자 기반 간단 구현
+    - [x] MIME 타입 + 확장자 기반 간단 구현
   - Refactor:
-    - [ ] 추후 컨피그 기반으로 커스터마이징 가능하도록 `FILE_TYPE_MAP` 분리
+    - [x] 추후 컨피그 기반으로 커스터마이징 가능하도록 `FILE_TYPE_MAP` 분리
 
 ---
 
-- [ ] **이미지 OCR 파이프라인 (`processImageWithOcr`) – Tesseract.js**
+- [x] **이미지 OCR 파이프라인 (`processImageWithOcr`) – Tesseract.js**
   - Red:
-    - [ ] 샘플 이미지 fixture를 사용하여 `processImageWithOcr` 호출 시,
+    - [x] 샘플 이미지 fixture를 사용하여 `processImageWithOcr` 호출 시,
           `OcrResult.text`에 특정 문자열(예: `"CORENEXUS"`)이 포함되는지 테스트 (스냅샷 테스트 가능)
   - Green:
-    - [ ] `tesseract.js`를 사용해 `File | Blob | HTMLCanvasElement`를 입력받아 OCR 수행하는 함수 구현
+    - [x] `tesseract.js`를 사용해 `File | Blob | HTMLCanvasElement`를 입력받아 OCR 수행하는 함수 구현
       ```ts
       async function processImageWithOcr(
         input: OcrInput,
@@ -220,60 +220,60 @@
       }
       ```
   - Refactor:
-    - [ ] Web Worker 사용 여부 옵션 (`useWorker`) 추가하여 메인 스레드 블로킹 최소화
+    - [x] Web Worker 사용 여부 옵션 (`useWorker`) 추가하여 메인 스레드 블로킹 최소화
 
 ---
 
-- [ ] **PDF OCR 파이프라인 (`processPdfWithOcr`) – PDF.js + Tesseract.js**
+- [x] **PDF OCR 파이프라인 (`processPdfWithOcr`) – PDF.js + Tesseract.js**
   - Red:
-    - [ ] 텍스트 기반 PDF 샘플에 대해:
+    - [x] 텍스트 기반 PDF 샘플에 대해:
       - 1단계: PDF.js 텍스트 레이어로 텍스트를 읽어오는 테스트 작성
       - 2단계: 스캔 PDF 샘플에 대해, 페이지를 이미지로 렌더링 후 Tesseract.js로 특정 키워드가 나오는지 테스트
   - Green:
-    - [ ] `pdfjs-dist`를 이용해 PDF 페이지를 canvas에 렌더링
-    - [ ] 각 페이지를 `processImageWithOcr`로 전달하여 OCR 수행
-    - [ ] 결과를 페이지별로 합쳐서 `OcrResult` 형태로 반환
+    - [x] `pdfjs-dist`를 이용해 PDF 페이지를 canvas에 렌더링
+    - [x] 각 페이지를 `processImageWithOcr`로 전달하여 OCR 수행
+    - [x] 결과를 페이지별로 합쳐서 `OcrResult` 형태로 반환
   - Refactor:
-    - [ ] "텍스트 레이어 우선, 실패 시 OCR fallback" 전략으로 최적화
-    - [ ] 페이지 병렬 처리(WorkerPool) 도입 고려
+    - [x] "텍스트 레이어 우선, 실패 시 OCR fallback" 전략으로 최적화
+    - [x] 페이지 병렬 처리(WorkerPool) 도입 고려
 
 ---
 
-- [ ] **Word/Excel/PPT 파일 파이프라인 (Office → PDF → OCR)**
+- [x] **Word/Excel/PPT 파일 파이프라인 (Office → PDF → OCR)**
   - Red:
-    - [ ] `officeIntegration`이 설정되지 않은 상태에서
+    - [x] `officeIntegration`이 설정되지 않은 상태에서
           `.docx` 파일을 `processFileWithOcr`에 넣으면,
           "Office 통합 미구현" 에러가 발생하는지 테스트
   - Green:
-    - [ ] `officeIntegration === 'apryse-webviewer'` 인 경우:
+    - [x] `officeIntegration === 'apryse-webviewer'` 인 경우:
       - WebViewer SDK를 사용하여 업로드된 `docx/xlsx/pptx`를 브라우저에서 PDF로 변환
       - 변환된 PDF Blob을 `processPdfWithOcr`에 전달
-    - [ ] `officeIntegration === 'nutrient-websdk'` 인 경우:
+    - [x] `officeIntegration === 'nutrient-websdk'` 인 경우:
       - Nutrient SDK로 동일한 흐름 구현 (인터페이스는 추후 어댑터로 통합)
   - Refactor:
-    - [ ] `OfficeToPdfAdapter` 인터페이스 정의
+    - [x] `OfficeToPdfAdapter` 인터페이스 정의
       ```ts
       interface OfficeToPdfAdapter {
         canHandle(mimeType: string): boolean;
         convertToPdf(file: File): Promise<Blob>; // PDF Blob
       }
       ```
-    - [ ] `ApryseOfficeToPdfAdapter`, `NutrientOfficeToPdfAdapter` 구현하고
+    - [x] `ApryseOfficeToPdfAdapter`, `NutrientOfficeToPdfAdapter` 구현하고
           DI 형태로 `ocr-core`에 주입 가능하도록 설계
 
 ---
 
-- [ ] **상위 통합 API: `processFileWithOcr(file: File, options?: OcrOptions)`**
+- [x] **상위 통합 API: `processFileWithOcr(file: File, options?: OcrOptions)`**
   - Red:
-    - [ ] 다양한 확장자(`jpg`, `pdf`, `docx`, `xlsx`, `pptx`)에 대해
+    - [x] 다양한 확장자(`jpg`, `pdf`, `docx`, `xlsx`, `pptx`)에 대해
           내부적으로 올바른 파이프라인이 호출되는지 단위 테스트
   - Green:
-    - [ ] `detectFileType` 결과에 따라 분기 처리
+    - [x] `detectFileType` 결과에 따라 분기 처리
       - `"image"` → `processImageWithOcr`
       - `"pdf"` → `processPdfWithOcr`
       - `"word" | "excel" | "ppt"` → Office → PDF 변환 후 `processPdfWithOcr`
   - Refactor:
-    - [ ] 추후 기타 포맷(HWP, TIFF 등)을 플러그인 방식으로 추가할 수 있도록
+    - [x] 추후 기타 포맷(HWP, TIFF 등)을 플러그인 방식으로 추가할 수 있도록
           `FileTypeHandler` 인터페이스 추상화
 
 ---
@@ -293,29 +293,29 @@
 
 ### 3-2. UI 기본 흐름 정의 (업로드 → OCR → 결과 표시)
 
-- [ ] **기본 OCR 플로우 컴포넌트 구현**
+- [x] **기본 OCR 플로우 컴포넌트 구현**
   - Red:
-    - [ ] 사용자가 이미지를 선택 → "인식하기" 버튼 클릭 시
+    - [x] 사용자가 이미지를 선택 → "인식하기" 버튼 클릭 시
       - 로딩 스피너가 표시되고
       - OCR 결과 텍스트 영역이 존재하는지 테스트
   - Green:
-    - [ ] `OcrUploader` 컴포넌트 구현
+    - [x] `OcrUploader` 컴포넌트 구현
       - 이미지 업로드 input
       - "인식하기" 버튼
-    - [ ] `@core-nexus/ocr-core`의 `recognize`를 호출하여 결과 표시
+    - [x] `@core-nexus/ocr-core`의 `recognize`를 호출하여 결과 표시
   - Refactor:
-    - [ ] UI 상태를 `useReducer` 또는 상태관리 라이브러리로 정리(필요 시 Zustand 등)
+    - [x] UI 상태를 `useReducer` 또는 상태관리 라이브러리로 정리(필요 시 Zustand 등)
 
 ### 3-3. 옵션 설정 UI (language / 옵션)
 
-- [ ] **OCR 옵션 설정 패널**
+- [x] **OCR 옵션 설정 패널**
   - Red:
-    - [ ] 언어 드롭다운에서 언어 변경 시, 내부 상태에 반영되는지 테스트
+    - [x] 언어 드롭다운에서 언어 변경 시, 내부 상태에 반영되는지 테스트
   - Green:
-    - [ ] `language`, `detectOrientation`, `enhanceContrast`를 설정할 수 있는 패널 구현
-    - [ ] 해당 옵션이 `recognize` 호출 시 전달되는지 연결
+    - [x] `language`, `detectOrientation`, `enhanceContrast`를 설정할 수 있는 패널 구현
+    - [x] 해당 옵션이 `recognize` 호출 시 전달되는지 연결
   - Refactor:
-    - [ ] 옵션 상태를 별도 훅(`useOcrOptions`)으로 분리
+    - [x] 옵션 상태를 별도 훅(`useOcrOptions`)으로 분리
 
 ---
 
@@ -323,10 +323,10 @@
 
 ### 4-1. TDD 사이클 템플릿 만들기
 
-- [ ] **TDD 작업 단위 템플릿 정의**
-  - [ ] `docs/TDD-GUIDE.md` 생성 (추후)
+- [x] **TDD 작업 단위 템플릿 정의**
+  - [x] `docs/TDD-GUIDE.md` 생성 (추후)
     - 각 TODO 항목에 대해 다음 순서로 진행:
       1. Red: 실패하는 테스트 작성
       2. Green: 최소 구현으로 테스트 통과
       3. Refactor: 구조/이름/중복 개선
-  - [ ] Cursor에서
+  - [x] Cursor에서 사용 가능한 프롬프트 가이드 포함

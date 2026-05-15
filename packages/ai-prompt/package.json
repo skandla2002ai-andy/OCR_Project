@@ -1,0 +1,33 @@
+{
+  "name": "@core-nexus/ai-prompt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "tsc && vite build",
+    "preview": "vite preview --port 5174",
+    "test": "vitest",
+    "lint": "pnpm exec eslint src --ext .ts,.tsx --ignore-path ../../.eslintignore"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "dexie": "^4.0.10",
+    "dexie-react-hooks": "^1.1.7",
+    "pdfjs-dist": "^5.4.449",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^1.6.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "jsdom": "^25.0.0"
+  }
+}
