@@ -1,0 +1,1085 @@
+{
+  "meta": {
+    "title": "AI Prompt PWA — Architecture Diagram Graph",
+    "description": "Nodes + edges derived from ontology.json. Compatible with Cytoscape.js, D3.js force-layout, and Mermaid. Layers are colour-coded; edge labels map to ontology objectProperties.",
+    "version": "1.0.0",
+    "ontologyRef": "./ontology.json",
+    "renderers": {
+      "cytoscape": "Pass elements[] directly to cytoscape({ container, elements, style, layout })",
+      "d3": "Use nodes[] and edges[] arrays; id/source/target fields match D3 force-link conventions",
+      "mermaid": "Copy mermaidSource string to https://mermaid.live or embed in Markdown ```mermaid block"
+    }
+  },
+
+  "layers": [
+    { "id": "Infrastructure", "color": "#94a3b8", "shape": "diamond" },
+    { "id": "Presentation", "color": "#6366f1", "shape": "roundrectangle" },
+    { "id": "Logic", "color": "#8b5cf6", "shape": "hexagon" },
+    { "id": "Service", "color": "#06b6d4", "shape": "rectangle" },
+    { "id": "Domain", "color": "#f59e0b", "shape": "ellipse" },
+    { "id": "External", "color": "#475569", "shape": "cut-rectangle" }
+  ],
+
+  "edgeTypes": [
+    { "id": "renders", "color": "#6366f1", "style": "solid", "label": "renders" },
+    { "id": "usesHook", "color": "#8b5cf6", "style": "dashed", "label": "usesHook" },
+    { "id": "callsService", "color": "#06b6d4", "style": "solid", "label": "callsService" },
+    { "id": "persistsUsing", "color": "#22c55e", "style": "solid", "label": "persistsUsing" },
+    { "id": "streamsWith", "color": "#f59e0b", "style": "dashed", "label": "streamsWith" },
+    { "id": "dependsOnLib", "color": "#94a3b8", "style": "dotted", "label": "dependsOn" },
+    { "id": "usesAPI", "color": "#ec4899", "style": "dashed", "label": "usesAPI" },
+    { "id": "registers", "color": "#f97316", "style": "solid", "label": "registers" },
+    { "id": "typedWith", "color": "#f59e0b", "style": "dotted", "label": "typedWith" },
+    { "id": "injectsContext", "color": "#84cc16", "style": "dashed", "label": "injectsCtx" }
+  ],
+
+  "nodes": [
+    {
+      "id": "main",
+      "label": "main.tsx",
+      "class": "EntryPoint",
+      "layer": "Infrastructure",
+      "filePath": "src/main.tsx",
+      "desc": "Bootstrap: mounts App, registers Service Worker"
+    },
+
+    {
+      "id": "App",
+      "label": "App.tsx",
+      "class": "RootComponent",
+      "layer": "Presentation",
+      "filePath": "src/App.tsx",
+      "desc": "Global state owner & layout orchestrator",
+      "state": [
+        "activeConvId",
+        "settings",
+        "pendingFiles",
+        "viewerOpen",
+        "viewerWidth",
+        "streamText",
+        "sidebarOpen"
+      ]
+    },
+    {
+      "id": "ConversationSidebar",
+      "label": "ConversationSidebar",
+      "class": "NavigationComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/ConversationSidebar.tsx",
+      "desc": "Conversation list — select / create / delete"
+    },
+    {
+      "id": "MessageList",
+      "label": "MessageList",
+      "class": "LayoutComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/MessageList.tsx",
+      "desc": "Chat bubbles + streaming cursor"
+    },
+    {
+      "id": "PromptInput",
+      "label": "PromptInput",
+      "class": "LayoutComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/PromptInput.tsx",
+      "desc": "Controlled input; file chips; drag-drop zone"
+    },
+    {
+      "id": "FilePreview",
+      "label": "FilePreview",
+      "class": "PrimitiveComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/FilePreview.tsx",
+      "desc": "Compact image/PDF attachment chips"
+    },
+    {
+      "id": "ViewerPanel",
+      "label": "ViewerPanel",
+      "class": "LayoutComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/ViewerPanel.tsx",
+      "desc": "Resizable file viewer: thumbnails + full preview"
+    },
+    {
+      "id": "SettingsPanel",
+      "label": "SettingsPanel",
+      "class": "OverlayComponent",
+      "layer": "Presentation",
+      "filePath": "src/components/SettingsPanel.tsx",
+      "desc": "Provider / model / system-prompt settings overlay"
+    },
+
+    {
+      "id": "useAI",
+      "label": "useAI",
+      "class": "AIStreamHook",
+      "layer": "Logic",
+      "filePath": "src/hooks/useAI.ts",
+      "desc": "Stream lifecycle: idle → streaming → done|error + abort"
+    },
+    {
+      "id": "useDb",
+      "label": "useDb",
+      "class": "StorageHook",
+      "layer": "Logic",
+      "filePath": "src/hooks/useDb.ts",
+      "desc": "Reactive DB queries via Dexie useLiveQuery"
+    },
+    {
+      "id": "useClipboard",
+      "label": "useClipboard",
+      "class": "InputHook",
+      "layer": "Logic",
+      "filePath": "src/hooks/useClipboard.ts",
+      "desc": "Paste-event image capture + navigator.clipboard.read()"
+    },
+    {
+      "id": "useDragDrop",
+      "label": "useDragDrop",
+      "class": "InputHook",
+      "layer": "Logic",
+      "filePath": "src/hooks/useDragDrop.ts",
+      "desc": "Drag & drop with isDragging overlay flag"
+    },
+
+    {
+      "id": "aiService",
+      "label": "ai.ts",
+      "class": "AIService",
+      "layer": "Service",
+      "filePath": "src/services/ai.ts",
+      "desc": "4-provider streaming engine (Anthropic|Proxy|Ollama|OpenAI)"
+    },
+    {
+      "id": "dbService",
+      "label": "db.ts",
+      "class": "PersistenceService",
+      "layer": "Service",
+      "filePath": "src/services/db.ts",
+      "desc": "Dexie CRUD: conversations / messages / settings"
+    },
+    {
+      "id": "pdfService",
+      "label": "pdf.ts",
+      "class": "MediaService",
+      "layer": "Service",
+      "filePath": "src/services/pdf.ts",
+      "desc": "PDF text extraction + blob URL lifecycle"
+    },
+    {
+      "id": "apiService",
+      "label": "api.ts",
+      "class": "NetworkService",
+      "layer": "Service",
+      "filePath": "src/services/api.ts",
+      "desc": "Generic HTTP fetch helper"
+    },
+
+    {
+      "id": "types",
+      "label": "types/index.ts",
+      "class": "TypeModule",
+      "layer": "Domain",
+      "filePath": "src/types/index.ts",
+      "desc": "Discriminated unions, interfaces, type guards, constants",
+      "exports": [
+        "ImageAttachment",
+        "PdfAttachment",
+        "FileAttachment",
+        "Message",
+        "Conversation",
+        "AppSettings",
+        "ApiProvider",
+        "AIModel",
+        "isPdf",
+        "isImage",
+        "DEFAULT_SETTINGS"
+      ]
+    },
+
+    {
+      "id": "AnthropicAPI",
+      "label": "Anthropic Claude API",
+      "class": "AIProvider",
+      "layer": "External",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "protocol": "SDK-stream",
+      "auth": "APIKey"
+    },
+    {
+      "id": "ServerProxy",
+      "label": "Server Proxy (SSE)",
+      "class": "AIProvider",
+      "layer": "External",
+      "endpoint": "/api/ai (configurable)",
+      "protocol": "SSE",
+      "auth": "None (server-side)"
+    },
+    {
+      "id": "OllamaAPI",
+      "label": "Ollama (Local LLM)",
+      "class": "AIProvider",
+      "layer": "External",
+      "endpoint": "http://localhost:11434/api/chat",
+      "protocol": "NDJSON",
+      "auth": "None"
+    },
+    {
+      "id": "OpenAIAPI",
+      "label": "OpenAI / Compatible",
+      "class": "AIProvider",
+      "layer": "External",
+      "endpoint": "https://api.openai.com/v1/chat/completions",
+      "protocol": "SSE",
+      "auth": "BearerToken"
+    },
+    {
+      "id": "IndexedDB",
+      "label": "IndexedDB (Dexie v4)",
+      "class": "StorageEngine",
+      "layer": "External",
+      "desc": "3 object stores: conversations, messages, settings"
+    },
+    {
+      "id": "pdfjsDist",
+      "label": "pdfjs-dist",
+      "class": "Library",
+      "layer": "External",
+      "desc": "Client-side PDF parsing and text extraction"
+    },
+    {
+      "id": "anthropicSDK",
+      "label": "@anthropic-ai/sdk",
+      "class": "Library",
+      "layer": "External",
+      "desc": "Official Anthropic TypeScript SDK"
+    },
+    {
+      "id": "dexieLib",
+      "label": "Dexie + dexie-react-hooks",
+      "class": "Library",
+      "layer": "External",
+      "desc": "IndexedDB wrapper with useLiveQuery"
+    },
+    {
+      "id": "ClipboardAPI",
+      "label": "Clipboard API",
+      "class": "BrowserAPI",
+      "layer": "External",
+      "desc": "navigator.clipboard + ClipboardEvent"
+    },
+    {
+      "id": "DragDropAPI",
+      "label": "Drag & Drop API",
+      "class": "BrowserAPI",
+      "layer": "External",
+      "desc": "HTML DnD events + DataTransfer"
+    },
+    {
+      "id": "ServiceWorkerAPI",
+      "label": "Service Worker (PWA)",
+      "class": "BrowserAPI",
+      "layer": "External",
+      "desc": "Workbox offline cache via vite-plugin-pwa"
+    }
+  ],
+
+  "edges": [
+    { "id": "e01", "source": "main", "target": "App", "type": "renders", "label": "mounts" },
+    {
+      "id": "e02",
+      "source": "main",
+      "target": "ServiceWorkerAPI",
+      "type": "registers",
+      "label": "registers"
+    },
+
+    {
+      "id": "e03",
+      "source": "App",
+      "target": "ConversationSidebar",
+      "type": "renders",
+      "label": "renders"
+    },
+    {
+      "id": "e04",
+      "source": "App",
+      "target": "MessageList",
+      "type": "renders",
+      "label": "renders"
+    },
+    {
+      "id": "e05",
+      "source": "App",
+      "target": "PromptInput",
+      "type": "renders",
+      "label": "renders"
+    },
+    {
+      "id": "e06",
+      "source": "App",
+      "target": "ViewerPanel",
+      "type": "renders",
+      "label": "renders (if open)",
+      "conditional": true
+    },
+    {
+      "id": "e07",
+      "source": "App",
+      "target": "SettingsPanel",
+      "type": "renders",
+      "label": "renders (if open)",
+      "conditional": true
+    },
+    { "id": "e08", "source": "App", "target": "useAI", "type": "usesHook", "label": "usesHook" },
+    { "id": "e09", "source": "App", "target": "useDb", "type": "usesHook", "label": "usesHook" },
+    {
+      "id": "e10",
+      "source": "App",
+      "target": "dbService",
+      "type": "callsService",
+      "label": "CRUD"
+    },
+    {
+      "id": "e11",
+      "source": "App",
+      "target": "pdfService",
+      "type": "callsService",
+      "label": "revokeUrl"
+    },
+    { "id": "e12", "source": "App", "target": "types", "type": "typedWith", "label": "typedWith" },
+
+    {
+      "id": "e13",
+      "source": "PromptInput",
+      "target": "FilePreview",
+      "type": "renders",
+      "label": "renders"
+    },
+    {
+      "id": "e14",
+      "source": "PromptInput",
+      "target": "useClipboard",
+      "type": "usesHook",
+      "label": "usesHook"
+    },
+    {
+      "id": "e15",
+      "source": "PromptInput",
+      "target": "useDragDrop",
+      "type": "usesHook",
+      "label": "usesHook"
+    },
+    {
+      "id": "e16",
+      "source": "PromptInput",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e17",
+      "source": "ViewerPanel",
+      "target": "pdfService",
+      "type": "callsService",
+      "label": "revokeUrl"
+    },
+    {
+      "id": "e18",
+      "source": "ViewerPanel",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e19",
+      "source": "SettingsPanel",
+      "target": "dbService",
+      "type": "callsService",
+      "label": "saveSettings"
+    },
+    {
+      "id": "e20",
+      "source": "SettingsPanel",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+    {
+      "id": "e21",
+      "source": "MessageList",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+    {
+      "id": "e22",
+      "source": "ConversationSidebar",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e23",
+      "source": "useAI",
+      "target": "aiService",
+      "type": "callsService",
+      "label": "stream()"
+    },
+    {
+      "id": "e24",
+      "source": "useAI",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+    {
+      "id": "e25",
+      "source": "useDb",
+      "target": "dbService",
+      "type": "callsService",
+      "label": "liveQuery"
+    },
+    {
+      "id": "e26",
+      "source": "useDb",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+    {
+      "id": "e27",
+      "source": "useClipboard",
+      "target": "ClipboardAPI",
+      "type": "usesAPI",
+      "label": "usesAPI"
+    },
+    {
+      "id": "e28",
+      "source": "useClipboard",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+    {
+      "id": "e29",
+      "source": "useDragDrop",
+      "target": "DragDropAPI",
+      "type": "usesAPI",
+      "label": "usesAPI"
+    },
+    {
+      "id": "e30",
+      "source": "useDragDrop",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e31",
+      "source": "aiService",
+      "target": "AnthropicAPI",
+      "type": "streamsWith",
+      "label": "SDK-stream"
+    },
+    {
+      "id": "e32",
+      "source": "aiService",
+      "target": "ServerProxy",
+      "type": "streamsWith",
+      "label": "SSE"
+    },
+    {
+      "id": "e33",
+      "source": "aiService",
+      "target": "OllamaAPI",
+      "type": "streamsWith",
+      "label": "NDJSON"
+    },
+    {
+      "id": "e34",
+      "source": "aiService",
+      "target": "OpenAIAPI",
+      "type": "streamsWith",
+      "label": "SSE"
+    },
+    {
+      "id": "e35",
+      "source": "aiService",
+      "target": "anthropicSDK",
+      "type": "dependsOnLib",
+      "label": "dependsOn"
+    },
+    {
+      "id": "e36",
+      "source": "aiService",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e37",
+      "source": "dbService",
+      "target": "IndexedDB",
+      "type": "persistsUsing",
+      "label": "R/W"
+    },
+    {
+      "id": "e38",
+      "source": "dbService",
+      "target": "dexieLib",
+      "type": "dependsOnLib",
+      "label": "dependsOn"
+    },
+    {
+      "id": "e39",
+      "source": "dbService",
+      "target": "types",
+      "type": "typedWith",
+      "label": "typedWith"
+    },
+
+    {
+      "id": "e40",
+      "source": "pdfService",
+      "target": "pdfjsDist",
+      "type": "dependsOnLib",
+      "label": "dependsOn"
+    },
+    {
+      "id": "e41",
+      "source": "pdfService",
+      "target": "aiService",
+      "type": "injectsContext",
+      "label": "text→context"
+    }
+  ],
+
+  "subgraphs": [
+    {
+      "id": "sg_entry",
+      "label": "Entry",
+      "nodeIds": ["main"]
+    },
+    {
+      "id": "sg_ui",
+      "label": "UI Components",
+      "nodeIds": [
+        "App",
+        "ConversationSidebar",
+        "MessageList",
+        "PromptInput",
+        "FilePreview",
+        "ViewerPanel",
+        "SettingsPanel"
+      ]
+    },
+    {
+      "id": "sg_hooks",
+      "label": "React Hooks",
+      "nodeIds": ["useAI", "useDb", "useClipboard", "useDragDrop"]
+    },
+    {
+      "id": "sg_services",
+      "label": "Services",
+      "nodeIds": ["aiService", "dbService", "pdfService", "apiService"]
+    },
+    {
+      "id": "sg_domain",
+      "label": "Domain Types",
+      "nodeIds": ["types"]
+    },
+    {
+      "id": "sg_providers",
+      "label": "AI Providers",
+      "nodeIds": ["AnthropicAPI", "ServerProxy", "OllamaAPI", "OpenAIAPI"]
+    },
+    {
+      "id": "sg_external",
+      "label": "External Systems",
+      "nodeIds": [
+        "IndexedDB",
+        "pdfjsDist",
+        "anthropicSDK",
+        "dexieLib",
+        "ClipboardAPI",
+        "DragDropAPI",
+        "ServiceWorkerAPI"
+      ]
+    }
+  ],
+
+  "cytoscapeElements": {
+    "_comment": "Drop this array into cytoscape({ elements: [...] }) — style by node.data.layer and edge.data.type",
+    "nodes": [
+      {
+        "data": {
+          "id": "main",
+          "label": "main.tsx",
+          "layer": "Infrastructure",
+          "class": "EntryPoint"
+        }
+      },
+      {
+        "data": {
+          "id": "App",
+          "label": "App.tsx",
+          "layer": "Presentation",
+          "class": "RootComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "ConversationSidebar",
+          "label": "ConversationSidebar",
+          "layer": "Presentation",
+          "class": "NavigationComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "MessageList",
+          "label": "MessageList",
+          "layer": "Presentation",
+          "class": "LayoutComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "PromptInput",
+          "label": "PromptInput",
+          "layer": "Presentation",
+          "class": "LayoutComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "FilePreview",
+          "label": "FilePreview",
+          "layer": "Presentation",
+          "class": "PrimitiveComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "ViewerPanel",
+          "label": "ViewerPanel",
+          "layer": "Presentation",
+          "class": "LayoutComponent"
+        }
+      },
+      {
+        "data": {
+          "id": "SettingsPanel",
+          "label": "SettingsPanel",
+          "layer": "Presentation",
+          "class": "OverlayComponent"
+        }
+      },
+      { "data": { "id": "useAI", "label": "useAI", "layer": "Logic", "class": "AIStreamHook" } },
+      { "data": { "id": "useDb", "label": "useDb", "layer": "Logic", "class": "StorageHook" } },
+      {
+        "data": {
+          "id": "useClipboard",
+          "label": "useClipboard",
+          "layer": "Logic",
+          "class": "InputHook"
+        }
+      },
+      {
+        "data": {
+          "id": "useDragDrop",
+          "label": "useDragDrop",
+          "layer": "Logic",
+          "class": "InputHook"
+        }
+      },
+      { "data": { "id": "aiService", "label": "ai.ts", "layer": "Service", "class": "AIService" } },
+      {
+        "data": {
+          "id": "dbService",
+          "label": "db.ts",
+          "layer": "Service",
+          "class": "PersistenceService"
+        }
+      },
+      {
+        "data": {
+          "id": "pdfService",
+          "label": "pdf.ts",
+          "layer": "Service",
+          "class": "MediaService"
+        }
+      },
+      {
+        "data": {
+          "id": "apiService",
+          "label": "api.ts",
+          "layer": "Service",
+          "class": "NetworkService"
+        }
+      },
+      {
+        "data": {
+          "id": "types",
+          "label": "types/index.ts",
+          "layer": "Domain",
+          "class": "TypeModule"
+        }
+      },
+      {
+        "data": {
+          "id": "AnthropicAPI",
+          "label": "Anthropic API",
+          "layer": "External",
+          "class": "AIProvider"
+        }
+      },
+      {
+        "data": {
+          "id": "ServerProxy",
+          "label": "Server Proxy",
+          "layer": "External",
+          "class": "AIProvider"
+        }
+      },
+      {
+        "data": {
+          "id": "OllamaAPI",
+          "label": "Ollama (Local)",
+          "layer": "External",
+          "class": "AIProvider"
+        }
+      },
+      {
+        "data": {
+          "id": "OpenAIAPI",
+          "label": "OpenAI / Compat.",
+          "layer": "External",
+          "class": "AIProvider"
+        }
+      },
+      {
+        "data": {
+          "id": "IndexedDB",
+          "label": "IndexedDB",
+          "layer": "External",
+          "class": "StorageEngine"
+        }
+      },
+      {
+        "data": {
+          "id": "pdfjsDist",
+          "label": "pdfjs-dist",
+          "layer": "External",
+          "class": "Library"
+        }
+      },
+      {
+        "data": {
+          "id": "anthropicSDK",
+          "label": "@anthropic-ai/sdk",
+          "layer": "External",
+          "class": "Library"
+        }
+      },
+      {
+        "data": { "id": "dexieLib", "label": "Dexie v4", "layer": "External", "class": "Library" }
+      },
+      {
+        "data": {
+          "id": "ClipboardAPI",
+          "label": "Clipboard API",
+          "layer": "External",
+          "class": "BrowserAPI"
+        }
+      },
+      {
+        "data": {
+          "id": "DragDropAPI",
+          "label": "DragDrop API",
+          "layer": "External",
+          "class": "BrowserAPI"
+        }
+      },
+      {
+        "data": {
+          "id": "ServiceWorkerAPI",
+          "label": "Service Worker",
+          "layer": "External",
+          "class": "BrowserAPI"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "data": {
+          "id": "e01",
+          "source": "main",
+          "target": "App",
+          "type": "renders",
+          "label": "mounts"
+        }
+      },
+      {
+        "data": {
+          "id": "e02",
+          "source": "main",
+          "target": "ServiceWorkerAPI",
+          "type": "registers",
+          "label": "registers"
+        }
+      },
+      {
+        "data": {
+          "id": "e03",
+          "source": "App",
+          "target": "ConversationSidebar",
+          "type": "renders",
+          "label": "renders"
+        }
+      },
+      {
+        "data": {
+          "id": "e04",
+          "source": "App",
+          "target": "MessageList",
+          "type": "renders",
+          "label": "renders"
+        }
+      },
+      {
+        "data": {
+          "id": "e05",
+          "source": "App",
+          "target": "PromptInput",
+          "type": "renders",
+          "label": "renders"
+        }
+      },
+      {
+        "data": {
+          "id": "e06",
+          "source": "App",
+          "target": "ViewerPanel",
+          "type": "renders",
+          "label": "renders*"
+        }
+      },
+      {
+        "data": {
+          "id": "e07",
+          "source": "App",
+          "target": "SettingsPanel",
+          "type": "renders",
+          "label": "renders*"
+        }
+      },
+      {
+        "data": {
+          "id": "e08",
+          "source": "App",
+          "target": "useAI",
+          "type": "usesHook",
+          "label": "usesHook"
+        }
+      },
+      {
+        "data": {
+          "id": "e09",
+          "source": "App",
+          "target": "useDb",
+          "type": "usesHook",
+          "label": "usesHook"
+        }
+      },
+      {
+        "data": {
+          "id": "e10",
+          "source": "App",
+          "target": "dbService",
+          "type": "callsService",
+          "label": "CRUD"
+        }
+      },
+      {
+        "data": {
+          "id": "e11",
+          "source": "App",
+          "target": "pdfService",
+          "type": "callsService",
+          "label": "revokeUrl"
+        }
+      },
+      {
+        "data": {
+          "id": "e13",
+          "source": "PromptInput",
+          "target": "FilePreview",
+          "type": "renders",
+          "label": "renders"
+        }
+      },
+      {
+        "data": {
+          "id": "e14",
+          "source": "PromptInput",
+          "target": "useClipboard",
+          "type": "usesHook",
+          "label": "usesHook"
+        }
+      },
+      {
+        "data": {
+          "id": "e15",
+          "source": "PromptInput",
+          "target": "useDragDrop",
+          "type": "usesHook",
+          "label": "usesHook"
+        }
+      },
+      {
+        "data": {
+          "id": "e17",
+          "source": "ViewerPanel",
+          "target": "pdfService",
+          "type": "callsService",
+          "label": "revokeUrl"
+        }
+      },
+      {
+        "data": {
+          "id": "e19",
+          "source": "SettingsPanel",
+          "target": "dbService",
+          "type": "callsService",
+          "label": "saveSettings"
+        }
+      },
+      {
+        "data": {
+          "id": "e23",
+          "source": "useAI",
+          "target": "aiService",
+          "type": "callsService",
+          "label": "stream()"
+        }
+      },
+      {
+        "data": {
+          "id": "e25",
+          "source": "useDb",
+          "target": "dbService",
+          "type": "callsService",
+          "label": "liveQuery"
+        }
+      },
+      {
+        "data": {
+          "id": "e27",
+          "source": "useClipboard",
+          "target": "ClipboardAPI",
+          "type": "usesAPI",
+          "label": "usesAPI"
+        }
+      },
+      {
+        "data": {
+          "id": "e29",
+          "source": "useDragDrop",
+          "target": "DragDropAPI",
+          "type": "usesAPI",
+          "label": "usesAPI"
+        }
+      },
+      {
+        "data": {
+          "id": "e31",
+          "source": "aiService",
+          "target": "AnthropicAPI",
+          "type": "streamsWith",
+          "label": "SDK-stream"
+        }
+      },
+      {
+        "data": {
+          "id": "e32",
+          "source": "aiService",
+          "target": "ServerProxy",
+          "type": "streamsWith",
+          "label": "SSE"
+        }
+      },
+      {
+        "data": {
+          "id": "e33",
+          "source": "aiService",
+          "target": "OllamaAPI",
+          "type": "streamsWith",
+          "label": "NDJSON"
+        }
+      },
+      {
+        "data": {
+          "id": "e34",
+          "source": "aiService",
+          "target": "OpenAIAPI",
+          "type": "streamsWith",
+          "label": "SSE"
+        }
+      },
+      {
+        "data": {
+          "id": "e35",
+          "source": "aiService",
+          "target": "anthropicSDK",
+          "type": "dependsOnLib",
+          "label": "dependsOn"
+        }
+      },
+      {
+        "data": {
+          "id": "e37",
+          "source": "dbService",
+          "target": "IndexedDB",
+          "type": "persistsUsing",
+          "label": "R/W"
+        }
+      },
+      {
+        "data": {
+          "id": "e38",
+          "source": "dbService",
+          "target": "dexieLib",
+          "type": "dependsOnLib",
+          "label": "dependsOn"
+        }
+      },
+      {
+        "data": {
+          "id": "e40",
+          "source": "pdfService",
+          "target": "pdfjsDist",
+          "type": "dependsOnLib",
+          "label": "dependsOn"
+        }
+      },
+      {
+        "data": {
+          "id": "e41",
+          "source": "pdfService",
+          "target": "aiService",
+          "type": "injectsContext",
+          "label": "text→context"
+        }
+      }
+    ]
+  },
+
+  "mermaidSource": "graph LR\n\n  subgraph ENTRY[\"🚀 Entry\"]\n    main[\"main.tsx\"]\n  end\n\n  subgraph UI[\"🖼 UI Components\"]\n    App[\"App.tsx\\n(Root + State)\"]\n    CS[\"ConversationSidebar\"]\n    ML[\"MessageList\"]\n    PI[\"PromptInput\"]\n    FP[\"FilePreview\"]\n    VP[\"ViewerPanel\"]\n    SP[\"SettingsPanel\"]\n  end\n\n  subgraph HOOKS[\"🎣 React Hooks\"]\n    useAI[\"useAI\\n(AI Stream)\"]\n    useDb[\"useDb\\n(Reactive DB)\"]\n    useCB[\"useClipboard\\n(Paste)\"]\n    useDD[\"useDragDrop\\n(Drop)\"]\n  end\n\n  subgraph SVC[\"⚙️ Services\"]\n    aiSvc[\"ai.ts\\n4-Provider Stream\"]\n    dbSvc[\"db.ts\\nDexie CRUD\"]\n    pdfSvc[\"pdf.ts\\nPDF Extract\"]\n  end\n\n  subgraph DOMAIN[\"📐 Domain\"]\n    types[\"types/index.ts\"]\n  end\n\n  subgraph PROVIDERS[\"🤖 AI Providers\"]\n    ANT[\"Anthropic API\\nSDK-stream\"]\n    PRX[\"Server Proxy\\nSSE\"]\n    OLL[\"Ollama Local\\nNDJSON\"]\n    OAI[\"OpenAI / Compat\\nSSE\"]\n  end\n\n  subgraph EXT[\"🌐 External\"]\n    IDB[(\"IndexedDB\\nDexie v4\")]\n    PDF[\"pdfjs-dist\"]\n    SDK[\"@anthropic-ai/sdk\"]\n    CB[\"Clipboard API\"]\n    DD[\"DragDrop API\"]\n    SW[\"Service Worker\\nPWA\"]\n  end\n\n  main -->|mounts| App\n  main -->|registers| SW\n\n  App -->|renders| CS\n  App -->|renders| ML\n  App -->|renders| PI\n  App -.->|renders if open| VP\n  App -.->|renders if open| SP\n  App -->|usesHook| useAI\n  App -->|usesHook| useDb\n  App -->|callsService| dbSvc\n  App -->|callsService| pdfSvc\n\n  PI -->|renders| FP\n  PI -->|usesHook| useCB\n  PI -->|usesHook| useDD\n  VP -->|callsService| pdfSvc\n  SP -->|callsService| dbSvc\n\n  useAI -->|callsService| aiSvc\n  useDb -->|callsService| dbSvc\n  useCB -->|usesAPI| CB\n  useDD -->|usesAPI| DD\n\n  aiSvc -->|SDK-stream| ANT\n  aiSvc -->|SSE| PRX\n  aiSvc -->|NDJSON| OLL\n  aiSvc -->|SSE| OAI\n  aiSvc -.->|dependsOn| SDK\n\n  dbSvc -->|R/W| IDB\n  dbSvc -.->|dependsOn| IDB\n  pdfSvc -.->|dependsOn| PDF\n  pdfSvc -->|text context| aiSvc\n\n  App -.->|typedWith| types\n  PI -.->|typedWith| types\n  VP -.->|typedWith| types\n  useAI -.->|typedWith| types\n  useDb -.->|typedWith| types\n  aiSvc -.->|typedWith| types\n  dbSvc -.->|typedWith| types"
+}
