@@ -1,4 +1,4 @@
-name: Deploy AI Prompt → GitHub Pages
+name: Deploy AI Prompt to GitHub Pages
 
 on:
   push:
@@ -32,23 +32,24 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version 미지정 → package.json의 packageManager 필드(pnpm@9.0.0) 자동 감지
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22' # package.json engines: >=22.0.0 과 일치
           cache: pnpm
 
       - name: Install dependencies
+        env:
+          HUSKY: '0' # CI에서 husky git-hooks 설치 건너뜀
         run: pnpm install --frozen-lockfile
 
       - name: Build ai-prompt (GitHub Pages base path)
         working-directory: packages/ai-prompt
         env:
           # GitHub Pages URL: https://<user>.github.io/OCR_Project/
-          # vite.config.ts 에서 base = /OCR_Project/ 로 변환됨
+          # vite.config.ts에서 base = /OCR_Project/ 로 변환됨
           VITE_BASE_SUBPATH: OCR_Project
         run: pnpm build
 
@@ -57,11 +58,14 @@ jobs:
           echo "=== dist/ ==="
           ls packages/ai-prompt/dist/
           echo ""
-          echo "=== manifest.webmanifest ==="
-          cat packages/ai-prompt/dist/manifest.webmanifest
-          echo ""
-          echo "=== sw.js first 5 lines ==="
-          head -5 packages/ai-prompt/dist/sw.js
+          echo "=== manifest scope & start_url ==="
+          cat packages/ai-prompt/dist/manifest.webmanifest | python3 -c "
+          import json,sys
+          m=json.load(sys.stdin)
+          print('scope    :', m['scope'])
+          print('start_url:', m['start_url'])
+          print('icons    :', [i['sizes'] for i in m['icons']])
+          "
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -69,7 +73,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # packages/ai-prompt/dist 의 내용물을 Pages 루트로 배포
           path: packages/ai-prompt/dist
 
   # ── 2. 배포 ──────────────────────────────────────────────────
