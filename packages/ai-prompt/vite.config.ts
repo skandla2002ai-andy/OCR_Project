@@ -2,7 +2,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// GitHub Pages 등 서브 경로 배포 시 VITE_BASE_SUBPATH 환경변수로 지정
+// 예) VITE_BASE_SUBPATH=OCR_Project pnpm build  →  base = '/OCR_Project/'
+// 로컬 dev/preview 에서는 설정 불필요  →  base = '/'
+const subpath = process.env.VITE_BASE_SUBPATH;
+const base = subpath ? `/${subpath}/` : '/';
+
 export default defineConfig({
+  base,
+
   resolve: {
     alias: { '@': '/src' },
   },
@@ -11,8 +19,8 @@ export default defineConfig({
     react(),
     VitePWA({
       // ── Service Worker 등록 방식 ───────────────────────────────
-      registerType: 'prompt', // 업데이트 시 사용자에게 확인 (autoUpdate 대신 UX 안전)
-      injectRegister: 'auto', // index.html 에 SW 등록 스크립트 자동 주입
+      registerType: 'prompt',
+      injectRegister: 'auto',
 
       // ── 정적 자산 사전 캐시 목록 ─────────────────────────────
       includeAssets: [
@@ -34,9 +42,9 @@ export default defineConfig({
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'portrait-primary',
-        scope: '/',
-        start_url: '/?source=pwa',
-        // purpose 는 반드시 항목별로 분리
+        // 서브 경로 배포 시 scope/start_url 이 base 와 일치해야 PWA 설치 가능
+        scope: base,
+        start_url: `${base}?source=pwa`,
         icons: [
           {
             src: 'icon-192.png',
@@ -62,15 +70,15 @@ export default defineConfig({
 
       // ── Workbox (Service Worker 캐싱 전략) ────────────────────
       workbox: {
-        // 빌드된 JS/CSS/HTML/폰트/이미지 사전 캐시
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,webp}'],
-        // 구버전 캐시 자동 정리
         cleanupOutdatedCaches: true,
-        // sourceMap 비활성(프로덕션)
         sourcemap: false,
+        // SPA: 모든 탐색 요청을 캐시된 index.html 로 폴백
+        navigateFallback: `${base}index.html`,
+        // API 호출은 SW 인터셉트에서 제외
+        navigateFallbackDenylist: [/^\/api\//, /^\/OCR_Project\/api\//],
         runtimeCaching: [
           {
-            // API 호출: 네트워크 우선, 10초 타임아웃 후 캐시 폴백
             urlPattern: /^\/api\//,
             handler: 'NetworkFirst',
             options: {
@@ -78,12 +86,11 @@ export default defineConfig({
               networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 1일
+                maxAgeSeconds: 60 * 60 * 24,
               },
             },
           },
           {
-            // pdfjs worker — CacheFirst (거의 변하지 않음)
             urlPattern: /pdf\.worker/,
             handler: 'CacheFirst',
             options: {
@@ -94,20 +101,17 @@ export default defineConfig({
         ],
       },
 
-      // ── 개발 서버에서도 SW 동작 확인 가능하게 ────────────────
       devOptions: {
-        enabled: false, // true 로 바꾸면 dev 모드에서도 SW 활성화
+        enabled: false,
         type: 'module',
       },
     }),
   ],
 
   build: {
-    // 번들 크기 경고 기준 (pdfjs-dist 가 크므로 올림)
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
-        // 주요 모듈을 별도 청크로 분리 → 초기 로드 최소화
         manualChunks: {
           react: ['react', 'react-dom'],
           anthropic: ['@anthropic-ai/sdk'],
