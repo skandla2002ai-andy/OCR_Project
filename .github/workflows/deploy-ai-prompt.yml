@@ -69,6 +69,8 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true # Pages가 비활성화 상태면 자동 활성화 시도
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
