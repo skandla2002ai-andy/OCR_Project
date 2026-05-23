@@ -1,0 +1,664 @@
+{
+  "@context": {
+    "@base": "https://ai-prompt.app/onto#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    ":": "https://ai-prompt.app/onto#"
+  },
+
+  "ontology": {
+    "@id": ":AIPromptOntology",
+    "owl:versionInfo": "1.0.0",
+    "rdfs:label": "AI Prompt PWA Architecture Ontology",
+    "rdfs:comment": "Formal description of the ai-prompt package architecture — components, hooks, services, types, and external integrations — expressed as an OWL-inspired JSON-LD ontology.",
+    "generatedAt": "2026-05-15",
+    "sourceRoot": "packages/ai-prompt/src"
+  },
+
+  "classes": [
+    {
+      "@id": ":Module",
+      "label": "Module",
+      "comment": "Abstract root class for every artefact in the system.",
+      "subClassOf": "owl:Thing",
+      "abstract": true
+    },
+    {
+      "@id": ":SourceModule",
+      "label": "Source Module",
+      "comment": "A TypeScript / TSX file that is part of the project source.",
+      "subClassOf": ":Module",
+      "abstract": true
+    },
+    {
+      "@id": ":ExternalModule",
+      "label": "External Module",
+      "comment": "A system, API, or library that lives outside the project source.",
+      "subClassOf": ":Module",
+      "abstract": true
+    },
+
+    {
+      "@id": ":EntryPoint",
+      "label": "Entry Point",
+      "comment": "Root bootstrapping file. Mounts the React tree and registers the PWA service worker.",
+      "subClassOf": ":SourceModule",
+      "layer": "Infrastructure",
+      "cardinality": { "owl:maxCardinality": 1 }
+    },
+
+    {
+      "@id": ":ReactComponent",
+      "label": "React Component",
+      "comment": "A TypeScript function component that returns JSX and participates in the React render tree.",
+      "subClassOf": ":SourceModule",
+      "layer": "Presentation",
+      "abstract": true
+    },
+    {
+      "@id": ":RootComponent",
+      "label": "Root Component",
+      "comment": "Singleton top-level component; owns global UI state, orchestrates all children, and wires together hooks and services.",
+      "subClassOf": ":ReactComponent",
+      "cardinality": { "owl:maxCardinality": 1 }
+    },
+    {
+      "@id": ":LayoutComponent",
+      "label": "Layout Component",
+      "comment": "Structural UI component responsible for a distinct visual region (message list, input pane, viewer panel).",
+      "subClassOf": ":ReactComponent"
+    },
+    {
+      "@id": ":NavigationComponent",
+      "label": "Navigation Component",
+      "comment": "Component that lets the user navigate between conversations or app sections.",
+      "subClassOf": ":ReactComponent"
+    },
+    {
+      "@id": ":OverlayComponent",
+      "label": "Overlay Component",
+      "comment": "Full-screen modal or side-sheet that overlays the main content.",
+      "subClassOf": ":ReactComponent"
+    },
+    {
+      "@id": ":PrimitiveComponent",
+      "label": "Primitive Component",
+      "comment": "Small, reusable UI unit with no global state or service calls.",
+      "subClassOf": ":ReactComponent"
+    },
+
+    {
+      "@id": ":ReactHook",
+      "label": "React Hook",
+      "comment": "A custom hook (use* function) that encapsulates reusable stateful logic.",
+      "subClassOf": ":SourceModule",
+      "layer": "Logic",
+      "abstract": true
+    },
+    {
+      "@id": ":AIStreamHook",
+      "label": "AI Stream Hook",
+      "comment": "Hook that manages AI streaming lifecycle: idle → streaming → done / error, with abort support.",
+      "subClassOf": ":ReactHook"
+    },
+    {
+      "@id": ":StorageHook",
+      "label": "Storage Hook",
+      "comment": "Hook that provides live/reactive IndexedDB query results using Dexie useLiveQuery.",
+      "subClassOf": ":ReactHook"
+    },
+    {
+      "@id": ":InputHook",
+      "label": "Input Hook",
+      "comment": "Hook that captures user input from non-keyboard channels (clipboard paste, drag & drop).",
+      "subClassOf": ":ReactHook"
+    },
+
+    {
+      "@id": ":Service",
+      "label": "Service",
+      "comment": "Pure TypeScript module that implements a domain capability without any React dependency.",
+      "subClassOf": ":SourceModule",
+      "layer": "Service",
+      "abstract": true
+    },
+    {
+      "@id": ":AIService",
+      "label": "AI Service",
+      "comment": "Multi-provider streaming engine. Dispatches to one of four provider adapters (Anthropic, Proxy, Ollama, OpenAI) based on AppSettings.",
+      "subClassOf": ":Service"
+    },
+    {
+      "@id": ":PersistenceService",
+      "label": "Persistence Service",
+      "comment": "CRUD wrapper around the Dexie database (conversations, messages, settings tables).",
+      "subClassOf": ":Service"
+    },
+    {
+      "@id": ":MediaService",
+      "label": "Media Service",
+      "comment": "PDF loading and text extraction via pdfjs-dist; manages blob URL lifecycle.",
+      "subClassOf": ":Service"
+    },
+    {
+      "@id": ":NetworkService",
+      "label": "Network Service",
+      "comment": "Generic fetch-based HTTP utilities (proxy helper).",
+      "subClassOf": ":Service"
+    },
+
+    {
+      "@id": ":TypeModule",
+      "label": "Type Module",
+      "comment": "Pure type-definition file. Contains interfaces, discriminated unions, type guards, and constants with no runtime logic beyond type guards.",
+      "subClassOf": ":SourceModule",
+      "layer": "Domain"
+    },
+
+    {
+      "@id": ":AIProvider",
+      "label": "AI Provider",
+      "comment": "External AI inference endpoint. Receives a formatted message list and streams token deltas.",
+      "subClassOf": ":ExternalModule",
+      "layer": "External"
+    },
+    {
+      "@id": ":StorageEngine",
+      "label": "Storage Engine",
+      "comment": "Browser-native key-value / object-store persistence backend.",
+      "subClassOf": ":ExternalModule",
+      "layer": "External"
+    },
+    {
+      "@id": ":Library",
+      "label": "Library",
+      "comment": "Third-party npm package used as a building block.",
+      "subClassOf": ":ExternalModule",
+      "layer": "External"
+    },
+    {
+      "@id": ":BrowserAPI",
+      "label": "Browser API",
+      "comment": "Native browser capability accessed directly without an npm wrapper.",
+      "subClassOf": ":ExternalModule",
+      "layer": "External"
+    }
+  ],
+
+  "objectProperties": [
+    {
+      "@id": ":renders",
+      "label": "renders",
+      "comment": "Subject component includes object component in its JSX return tree.",
+      "domain": ":ReactComponent",
+      "range": ":ReactComponent",
+      "characteristics": ["Irreflexive"]
+    },
+    {
+      "@id": ":usesHook",
+      "label": "usesHook",
+      "comment": "Component or hook calls the target hook inside its function body.",
+      "domain": { "owl:unionOf": [":ReactComponent", ":ReactHook"] },
+      "range": ":ReactHook"
+    },
+    {
+      "@id": ":callsService",
+      "label": "callsService",
+      "comment": "Component or hook directly invokes a service function (import-level dependency).",
+      "domain": { "owl:unionOf": [":ReactComponent", ":ReactHook"] },
+      "range": ":Service"
+    },
+    {
+      "@id": ":persistsUsing",
+      "label": "persistsUsing",
+      "comment": "Persistence service stores and retrieves data via the target storage engine.",
+      "domain": ":PersistenceService",
+      "range": ":StorageEngine"
+    },
+    {
+      "@id": ":streamsWith",
+      "label": "streamsWith",
+      "comment": "AI service dispatches streaming requests to the target AI provider.",
+      "domain": ":AIService",
+      "range": ":AIProvider"
+    },
+    {
+      "@id": ":dependsOnLib",
+      "label": "dependsOnLib",
+      "comment": "Service or component has a runtime dependency on the target npm library.",
+      "domain": { "owl:unionOf": [":Service", ":ReactComponent"] },
+      "range": ":Library"
+    },
+    {
+      "@id": ":usesAPI",
+      "label": "usesAPI",
+      "comment": "Hook or service directly invokes the target browser-native API.",
+      "domain": { "owl:unionOf": [":ReactHook", ":Service"] },
+      "range": ":BrowserAPI"
+    },
+    {
+      "@id": ":registers",
+      "label": "registers",
+      "comment": "Entry point registers or bootstraps the target browser API (e.g. service worker).",
+      "domain": ":EntryPoint",
+      "range": ":BrowserAPI"
+    },
+    {
+      "@id": ":typedWith",
+      "label": "typedWith",
+      "comment": "Module imports and relies on types/interfaces defined in the target type module.",
+      "domain": ":SourceModule",
+      "range": ":TypeModule"
+    },
+    {
+      "@id": ":injectsContext",
+      "label": "injectsContext",
+      "comment": "Media service provides extracted text context that the AI service embeds in messages.",
+      "domain": ":MediaService",
+      "range": ":AIService",
+      "note": "Conceptual dependency: PDF text extracted by pdf.ts is injected into AI message content in App.tsx before being passed to ai.ts"
+    }
+  ],
+
+  "dataProperties": [
+    {
+      "@id": ":filePath",
+      "label": "filePath",
+      "range": "xsd:string",
+      "comment": "Relative path from project root."
+    },
+    {
+      "@id": ":layer",
+      "label": "layer",
+      "range": "xsd:string",
+      "comment": "Architectural layer: Presentation | Logic | Service | Domain | External | Infrastructure"
+    },
+    {
+      "@id": ":description",
+      "label": "description",
+      "range": "xsd:string"
+    },
+    {
+      "@id": ":streamProtocol",
+      "label": "streamProtocol",
+      "range": "xsd:string",
+      "comment": "Streaming protocol used by an AI provider: SSE | NDJSON | SDK-stream"
+    },
+    {
+      "@id": ":authMethod",
+      "label": "authMethod",
+      "range": "xsd:string",
+      "comment": "How the provider is authenticated: APIKey | None | BearerToken"
+    }
+  ],
+
+  "axioms": [
+    {
+      "type": "DisjointClasses",
+      "classes": [":SourceModule", ":ExternalModule"]
+    },
+    {
+      "type": "DisjointClasses",
+      "classes": [":ReactComponent", ":ReactHook", ":Service", ":TypeModule", ":EntryPoint"]
+    },
+    {
+      "type": "FunctionalProperty",
+      "property": ":renders",
+      "note": "A child can be rendered by multiple parents (e.g. ViewerPanel conditional render)"
+    },
+    {
+      "type": "SubPropertyChain",
+      "chain": [":callsService", ":persistsUsing"],
+      "result": ":indirectlyPersists",
+      "note": "If a component calls a persistence service, it indirectly persists via the storage engine"
+    }
+  ],
+
+  "individuals": [
+    {
+      "@id": ":main",
+      "@type": ":EntryPoint",
+      "label": "main.tsx",
+      "filePath": "src/main.tsx",
+      "layer": "Infrastructure",
+      "description": "Application bootstrap: calls ReactDOM.createRoot, registers the Vite PWA service worker, and renders <App />."
+    },
+    {
+      "@id": ":App",
+      "@type": ":RootComponent",
+      "label": "App.tsx",
+      "filePath": "src/App.tsx",
+      "layer": "Presentation",
+      "description": "Root component. Owns global state: activeConvId, settings, pendingFiles, viewerOpen/Width, streamText, sidebarOpen. Orchestrates conversation CRUD, AI submission, and layout."
+    },
+    {
+      "@id": ":ConversationSidebar",
+      "@type": ":NavigationComponent",
+      "label": "ConversationSidebar.tsx",
+      "filePath": "src/components/ConversationSidebar.tsx",
+      "layer": "Presentation",
+      "description": "Scrollable list of past conversations. Emits onSelect / onCreate / onDelete events. Highlights the active conversation."
+    },
+    {
+      "@id": ":MessageList",
+      "@type": ":LayoutComponent",
+      "label": "MessageList.tsx",
+      "filePath": "src/components/MessageList.tsx",
+      "layer": "Presentation",
+      "description": "Renders the conversation message bubbles. Shows streaming token delta with animated cursor. Auto-scrolls to bottom."
+    },
+    {
+      "@id": ":PromptInput",
+      "@type": ":LayoutComponent",
+      "label": "PromptInput.tsx",
+      "filePath": "src/components/PromptInput.tsx",
+      "layer": "Presentation",
+      "description": "Controlled input area. Accepts files prop from parent (App). Integrates clipboard paste, drag-drop, and file picker. Renders FilePreview chips."
+    },
+    {
+      "@id": ":FilePreview",
+      "@type": ":PrimitiveComponent",
+      "label": "FilePreview.tsx",
+      "filePath": "src/components/FilePreview.tsx",
+      "layer": "Presentation",
+      "description": "Compact row of attached-file chips rendered inside PromptInput. Images show thumbnail + lightbox; PDFs show expandable iframe."
+    },
+    {
+      "@id": ":ViewerPanel",
+      "@type": ":LayoutComponent",
+      "label": "ViewerPanel.tsx",
+      "filePath": "src/components/ViewerPanel.tsx",
+      "layer": "Presentation",
+      "description": "Resizable side panel (220–680 px) between sidebar and chat. Shows thumbnail strip + full preview for pending files and conversation images. Handles its own resize via mousedown/mousemove/mouseup."
+    },
+    {
+      "@id": ":SettingsPanel",
+      "@type": ":OverlayComponent",
+      "label": "SettingsPanel.tsx",
+      "filePath": "src/components/SettingsPanel.tsx",
+      "layer": "Presentation",
+      "description": "Full-screen overlay for provider/model/system-prompt configuration. Contains provider-specific sub-fields and a connection-test button."
+    },
+
+    {
+      "@id": ":useAI",
+      "@type": ":AIStreamHook",
+      "label": "useAI.ts",
+      "filePath": "src/hooks/useAI.ts",
+      "layer": "Logic",
+      "description": "Wraps streamCompletion with React state: { status: idle|streaming|error, error, stream(), abort() }. Manages AbortController lifecycle."
+    },
+    {
+      "@id": ":useDb",
+      "@type": ":StorageHook",
+      "label": "useDb.ts",
+      "filePath": "src/hooks/useDb.ts",
+      "layer": "Logic",
+      "description": "Exports useConversations() and useMessages(convId) — both backed by Dexie useLiveQuery for reactive re-render on DB change."
+    },
+    {
+      "@id": ":useClipboard",
+      "@type": ":InputHook",
+      "label": "useClipboard.ts",
+      "filePath": "src/hooks/useClipboard.ts",
+      "layer": "Logic",
+      "description": "useClipboardPaste handles paste events (image/text). readImageFromClipboard reads programmatically via navigator.clipboard.read()."
+    },
+    {
+      "@id": ":useDragDrop",
+      "@type": ":InputHook",
+      "label": "useDragDrop.ts",
+      "filePath": "src/hooks/useDragDrop.ts",
+      "layer": "Logic",
+      "description": "Returns { isDragging, dragProps, processFiles }. Handles dragenter/over/leave/drop; dispatches images to onImages and PDFs to onPdfs callbacks."
+    },
+
+    {
+      "@id": ":aiService",
+      "@type": ":AIService",
+      "label": "ai.ts",
+      "filePath": "src/services/ai.ts",
+      "layer": "Service",
+      "description": "streamCompletion() switches on AppSettings.provider to invoke one of four adapters: streamAnthropic (SDK stream), streamProxy (SSE fetch), streamOllama (NDJSON stream), streamOpenAI (SSE fetch). Shared readSSE() parser for Anthropic proxy + OpenAI format."
+    },
+    {
+      "@id": ":dbService",
+      "@type": ":PersistenceService",
+      "label": "db.ts",
+      "filePath": "src/services/db.ts",
+      "layer": "Service",
+      "description": "Dexie v4 database (ai-prompt-db). Tables: conversations (id,createdAt,updatedAt), messages (id,conversationId,createdAt), settings (key). Exports: getSettings, saveSetting, saveSettings, createConversation, deleteConversation, addMessage, updateMessageContent."
+    },
+    {
+      "@id": ":pdfService",
+      "@type": ":MediaService",
+      "label": "pdf.ts",
+      "filePath": "src/services/pdf.ts",
+      "layer": "Service",
+      "description": "loadPdf(file) extracts text via pdfjs-dist and creates a blob URL for iframe preview. revokePdfUrl() frees the blob URL on removal. Worker configured via Vite ?url import."
+    },
+    {
+      "@id": ":apiService",
+      "@type": ":NetworkService",
+      "label": "api.ts",
+      "filePath": "src/services/api.ts",
+      "layer": "Service",
+      "description": "Generic HTTP fetch helper for proxy communication."
+    },
+
+    {
+      "@id": ":types",
+      "@type": ":TypeModule",
+      "label": "types/index.ts",
+      "filePath": "src/types/index.ts",
+      "layer": "Domain",
+      "description": "Core domain model. Key types: ImageAttachment (kind:'image'), PdfAttachment (kind:'pdf',blobUrl,pageCount,text), FileAttachment (union), Message, Conversation, AppSettings, ApiProvider (union), AIModel (union). Type guards: isPdf(), isImage().",
+      "exports": {
+        "types": [
+          "ImageAttachment",
+          "PdfAttachment",
+          "FileAttachment",
+          "Message",
+          "Conversation",
+          "AppSettings",
+          "ApiProvider",
+          "AIModel",
+          "MessageRole"
+        ],
+        "typeGuards": ["isPdf", "isImage"],
+        "constants": ["DEFAULT_SETTINGS", "PROVIDER_LABELS"]
+      }
+    },
+
+    {
+      "@id": ":AnthropicAPI",
+      "@type": ":AIProvider",
+      "label": "Anthropic Claude API",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "streamProtocol": "SDK-stream",
+      "authMethod": "APIKey",
+      "description": "Direct Anthropic API via @anthropic-ai/sdk. Supports vision (base64 image blocks). Models: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5."
+    },
+    {
+      "@id": ":ServerProxy",
+      "@type": ":AIProvider",
+      "label": "Server Proxy (SSE)",
+      "endpoint": "configurable (default: /api/ai)",
+      "streamProtocol": "SSE",
+      "authMethod": "None (server-side key)",
+      "description": "Self-hosted backend that proxies Anthropic API calls. Useful for hiding API keys from the browser."
+    },
+    {
+      "@id": ":OllamaAPI",
+      "@type": ":AIProvider",
+      "label": "Ollama (Local LLM)",
+      "endpoint": "http://localhost:11434/api/chat",
+      "streamProtocol": "NDJSON",
+      "authMethod": "None",
+      "description": "Local LLM runner. Vision-capable models receive base64 images. No API key required."
+    },
+    {
+      "@id": ":OpenAIAPI",
+      "@type": ":AIProvider",
+      "label": "OpenAI / Compatible API",
+      "endpoint": "configurable (default: https://api.openai.com/v1/chat/completions)",
+      "streamProtocol": "SSE",
+      "authMethod": "BearerToken",
+      "description": "OpenAI or any OpenAI-compatible endpoint (e.g. Azure, Groq, Mistral). Images sent as image_url blocks."
+    },
+
+    {
+      "@id": ":IndexedDB",
+      "@type": ":StorageEngine",
+      "label": "IndexedDB (via Dexie v4)",
+      "description": "Browser-native structured storage. Three object stores: conversations, messages, settings. Reactive queries via Dexie useLiveQuery."
+    },
+    {
+      "@id": ":pdfjsDist",
+      "@type": ":Library",
+      "label": "pdfjs-dist",
+      "version": "^4.x",
+      "description": "Mozilla PDF.js library for client-side PDF parsing and text extraction. Worker loaded via Vite ?url import."
+    },
+    {
+      "@id": ":anthropicSDK",
+      "@type": ":Library",
+      "label": "@anthropic-ai/sdk",
+      "version": "^0.x",
+      "description": "Official Anthropic TypeScript SDK. Used with dangerouslyAllowBrowser:true for direct browser calls."
+    },
+    {
+      "@id": ":dexie",
+      "@type": ":Library",
+      "label": "Dexie v4 + dexie-react-hooks",
+      "version": "^4.x",
+      "description": "Ergonomic IndexedDB wrapper. AppDatabase extends Dexie with typed tables."
+    },
+    {
+      "@id": ":ClipboardAPI",
+      "@type": ":BrowserAPI",
+      "label": "Clipboard API",
+      "description": "navigator.clipboard.read() for programmatic image access; ClipboardEvent.clipboardData for paste events."
+    },
+    {
+      "@id": ":DragDropAPI",
+      "@type": ":BrowserAPI",
+      "label": "Drag & Drop API",
+      "description": "HTML Drag and Drop event model (dragenter, dragleave, dragover, drop) with DataTransfer.files access."
+    },
+    {
+      "@id": ":ServiceWorkerAPI",
+      "@type": ":BrowserAPI",
+      "label": "Service Worker (PWA)",
+      "description": "Workbox-powered service worker generated by vite-plugin-pwa. Enables offline caching and installable PWA behaviour."
+    }
+  ],
+
+  "assertions": [
+    { "subject": ":main", "property": ":renders", "object": ":App" },
+    { "subject": ":main", "property": ":registers", "object": ":ServiceWorkerAPI" },
+
+    { "subject": ":App", "property": ":renders", "object": ":ConversationSidebar" },
+    { "subject": ":App", "property": ":renders", "object": ":MessageList" },
+    { "subject": ":App", "property": ":renders", "object": ":PromptInput" },
+    {
+      "subject": ":App",
+      "property": ":renders",
+      "object": ":ViewerPanel",
+      "condition": "viewerOpen === true"
+    },
+    {
+      "subject": ":App",
+      "property": ":renders",
+      "object": ":SettingsPanel",
+      "condition": "showSettings === true"
+    },
+    { "subject": ":App", "property": ":usesHook", "object": ":useAI" },
+    { "subject": ":App", "property": ":usesHook", "object": ":useDb" },
+    { "subject": ":App", "property": ":callsService", "object": ":dbService" },
+    {
+      "subject": ":App",
+      "property": ":callsService",
+      "object": ":pdfService",
+      "note": "revokePdfUrl on pending file removal"
+    },
+    { "subject": ":App", "property": ":typedWith", "object": ":types" },
+
+    { "subject": ":PromptInput", "property": ":renders", "object": ":FilePreview" },
+    { "subject": ":PromptInput", "property": ":usesHook", "object": ":useClipboard" },
+    { "subject": ":PromptInput", "property": ":usesHook", "object": ":useDragDrop" },
+    { "subject": ":PromptInput", "property": ":typedWith", "object": ":types" },
+
+    {
+      "subject": ":ViewerPanel",
+      "property": ":callsService",
+      "object": ":pdfService",
+      "note": "revokePdfUrl on thumb remove"
+    },
+    { "subject": ":ViewerPanel", "property": ":typedWith", "object": ":types" },
+
+    { "subject": ":MessageList", "property": ":typedWith", "object": ":types" },
+    { "subject": ":ConversationSidebar", "property": ":typedWith", "object": ":types" },
+    {
+      "subject": ":SettingsPanel",
+      "property": ":callsService",
+      "object": ":dbService",
+      "note": "saveSettings + getSettings"
+    },
+    { "subject": ":SettingsPanel", "property": ":typedWith", "object": ":types" },
+
+    { "subject": ":useAI", "property": ":callsService", "object": ":aiService" },
+    { "subject": ":useAI", "property": ":typedWith", "object": ":types" },
+    { "subject": ":useDb", "property": ":callsService", "object": ":dbService" },
+    { "subject": ":useDb", "property": ":typedWith", "object": ":types" },
+    { "subject": ":useClipboard", "property": ":usesAPI", "object": ":ClipboardAPI" },
+    { "subject": ":useClipboard", "property": ":typedWith", "object": ":types" },
+    { "subject": ":useDragDrop", "property": ":usesAPI", "object": ":DragDropAPI" },
+    { "subject": ":useDragDrop", "property": ":typedWith", "object": ":types" },
+
+    {
+      "subject": ":aiService",
+      "property": ":streamsWith",
+      "object": ":AnthropicAPI",
+      "note": "case 'anthropic'"
+    },
+    {
+      "subject": ":aiService",
+      "property": ":streamsWith",
+      "object": ":ServerProxy",
+      "note": "case 'proxy'"
+    },
+    {
+      "subject": ":aiService",
+      "property": ":streamsWith",
+      "object": ":OllamaAPI",
+      "note": "case 'ollama'"
+    },
+    {
+      "subject": ":aiService",
+      "property": ":streamsWith",
+      "object": ":OpenAIAPI",
+      "note": "case 'openai'"
+    },
+    {
+      "subject": ":aiService",
+      "property": ":dependsOnLib",
+      "object": ":anthropicSDK",
+      "note": "used only for Anthropic provider path"
+    },
+    { "subject": ":aiService", "property": ":typedWith", "object": ":types" },
+
+    { "subject": ":dbService", "property": ":persistsUsing", "object": ":IndexedDB" },
+    { "subject": ":dbService", "property": ":dependsOnLib", "object": ":dexie" },
+    { "subject": ":dbService", "property": ":typedWith", "object": ":types" },
+
+    { "subject": ":pdfService", "property": ":dependsOnLib", "object": ":pdfjsDist" },
+    {
+      "subject": ":pdfService",
+      "property": ":injectsContext",
+      "object": ":aiService",
+      "note": "Extracted PDF text injected by App.tsx before AI call"
+    }
+  ]
+}
