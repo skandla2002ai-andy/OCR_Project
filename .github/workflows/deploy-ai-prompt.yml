@@ -1,0 +1,86 @@
+name: Deploy AI Prompt → GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - claude/inspiring-bouman-6170fd # 현재 작업 브랜치에서도 즉시 테스트 가능
+    paths:
+      - 'packages/ai-prompt/**'
+      - '.github/workflows/deploy-ai-prompt.yml'
+  workflow_dispatch: # 수동 트리거 (Actions 탭 → Run workflow)
+
+# GitHub Pages 배포에 필요한 권한
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 동시 배포 방지 (진행 중인 배포는 유지, 대기 중인 것만 취소)
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  # ── 1. 빌드 ──────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ai-prompt (GitHub Pages base path)
+        working-directory: packages/ai-prompt
+        env:
+          # GitHub Pages URL: https://<user>.github.io/OCR_Project/
+          # vite.config.ts 에서 base = /OCR_Project/ 로 변환됨
+          VITE_BASE_SUBPATH: OCR_Project
+        run: pnpm build
+
+      - name: Verify build output
+        run: |
+          echo "=== dist/ ==="
+          ls packages/ai-prompt/dist/
+          echo ""
+          echo "=== manifest.webmanifest ==="
+          cat packages/ai-prompt/dist/manifest.webmanifest
+          echo ""
+          echo "=== sw.js first 5 lines ==="
+          head -5 packages/ai-prompt/dist/sw.js
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # packages/ai-prompt/dist 의 내용물을 Pages 루트로 배포
+          path: packages/ai-prompt/dist
+
+  # ── 2. 배포 ──────────────────────────────────────────────────
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
