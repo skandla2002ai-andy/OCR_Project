@@ -80,3 +80,4 @@ export * from './utils/fileType';
 export * from './pipelines/imagePipeline';
 export * from './pipelines/pdfPipeline';
 export * from './pipelines/filePipeline';
+export * from './pipelines/officePipeline';

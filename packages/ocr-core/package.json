@@ -19,10 +19,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "jszip": "^3.10.1",
+    "mammoth": "^1.8.0",
     "pdfjs-dist": "^5.4.449",
-    "tesseract.js": "^6.0.1"
+    "tesseract.js": "^6.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/jszip": "^3.4.1",
     "vitest": "^1.6.0"
   }
 }

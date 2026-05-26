@@ -52,12 +52,12 @@ export function OcrUploader() {
             id="file-upload"
             type="file"
             onChange={handleFileChange}
-            accept="image/*,.pdf"
+            accept="image/*,.pdf,.docx,.xlsx,.xls,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.ms-excel,application/vnd.ms-powerpoint"
             style={{ display: 'none' }}
           />
         </label>
         <span className="file-instruction">
-          {file ? file.name : '이미지 또는 PDF 파일을 선택하세요'}
+          {file ? file.name : '이미지, PDF 또는 Office 파일(.docx/.xlsx/.pptx)을 선택하세요'}
         </span>
       </div>
 
